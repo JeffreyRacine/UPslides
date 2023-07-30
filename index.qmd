@@ -86,7 +86,7 @@ options(crs.messages=FALSE,np.messages=FALSE,np.tree=TRUE)
 
 ::: {.nonincremental}
 
-- Link to slides - <a href="https://jeffreyracine.github.io/UPslides">jeffreyracine.github.io/UPworkshop</a> (case sensitive) (<a href="https://jeffreyracine-github-io.translate.goog/UPslides/?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=wapp#/title-slide">Google Translate</a>)
+- Link to slides - <a href="https://jeffreyracine.github.io/UPslides">jeffreyracine.github.io/UPslides</a> (case sensitive) (<a href="https://jeffreyracine-github-io.translate.goog/UPslides/?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=wapp#/title-slide">Google Translate</a>)
 
 - View **full screen** by pressing the F key (press the Esc key to revert)
 
