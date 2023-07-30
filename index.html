@@ -2241,9 +2241,12 @@ c&amp;c&amp;c&amp;\dots&amp; 1
 <h2>Fixed Effects One-way Error Component Model</h2>
 <ul>
 <li class="fragment"><p>Nonparametric fixed effects models can be obtained by treating the cross-section identifier as an unordered factor</p>
-<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/feecm_31013defdeb371d78dd70c252de9f774">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="fu">library</span>(np)</span>
-<span id="cb28-2"><a href="#cb28-2"></a>model.fe <span class="ot">&lt;-</span> <span class="fu">npreg</span>(y<span class="sc">~</span>x<span class="sc">+</span><span class="fu">factor</span>(id))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/feecm_9ca8f415bc938481c83e805b7e1f48a6">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="do">## Below is pseudo-code for generic data y, x (univariate) and </span></span>
+<span id="cb28-2"><a href="#cb28-2"></a><span class="do">## panel id (univariate) - we shall modify and use this for real</span></span>
+<span id="cb28-3"><a href="#cb28-3"></a><span class="do">## data but it demonstrates all the nuances of the approach</span></span>
+<span id="cb28-4"><a href="#cb28-4"></a><span class="fu">library</span>(np)</span>
+<span id="cb28-5"><a href="#cb28-5"></a>model.fe <span class="ot">&lt;-</span> <span class="fu">npreg</span>(y<span class="sc">~</span>x<span class="sc">+</span><span class="fu">factor</span>(id))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></li>
 <li class="fragment"><p>One benefit of this approach is the ability of the model to automatically pool or partially pool the model, if appropriate</p></li>
 <li class="fragment"><p>Nonparametric models with additive fixed effects (i.e., semiparametric) models have been considered by <span class="citation" data-cites="HENDERSON_CARROLL_LI:2008">Henderson, Carroll, and Li (<a href="#/references-scrollable" role="doc-biblioref" onclick="">2008</a>)</span> and <span class="citation" data-cites="LEE_ROBINSON:2015">Lee and Robinson (<a href="#/references-scrollable" role="doc-biblioref" onclick="">2015</a>)</span></p></li>

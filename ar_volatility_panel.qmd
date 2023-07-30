@@ -602,9 +602,13 @@ model.re <- npreg(y.star~x,ckerorder=2)
   ```{r feecm}
   #| echo: true
   #| eval: false
+  ## Below is pseudo-code for generic data y, x (univariate) and 
+  ## panel id (univariate) - we shall modify and use this for real
+  ## data but it demonstrates all the nuances of the approach
   library(np)
   model.fe <- npreg(y~x+factor(id))
-  ```   
+  ```
+
 - One benefit of this approach is the ability of the model to automatically pool or partially pool the model, if appropriate
 
 - Nonparametric models with additive fixed effects (i.e., semiparametric) models have been considered by
