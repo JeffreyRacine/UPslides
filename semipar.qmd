@@ -31,6 +31,8 @@
 
 ## Robinson's Partially Linear Model
 
+::: callout-important
+
 - The goal is to consistently estimate $\beta$
 
 - Identification conditions are required in order to identify the parameter vector $\beta$
@@ -45,6 +47,8 @@ thus the sum of the new intercept and the new $g(\cdot)$ function is
 observationally equivalent to the sum of the old ones
 
 - Since the functional form of $g(\cdot)$ is not specified, this immediately tells us that an intercept term cannot be identified in a partially linear model
+
+:::
 
 ## Robinson's Partially Linear Model
 
@@ -241,6 +245,8 @@ model)
 
 ## Identification
 
+::: callout-important
+
 - For semiparametric single index models, identification of $\beta_0$ and $g(\cdot)$ requires that
 
   - $x$ should not contain a constant (intercept)
@@ -252,6 +258,8 @@ model)
   - $g(\cdot)$ is differentiable and is not a constant function on the support of $x'\beta_0$
   
   - For the discrete components of $x$, varying the values of the discrete variables will not divide the support of $x'\beta_0$ into disjoint subsets
+  
+:::
 
 ## Ichimura's Method (Continuous $y$)
 
