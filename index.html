@@ -8,7 +8,7 @@
 <link href="index_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="index_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.433">
+  <meta name="generator" content="quarto-1.3.427">
 
   <meta name="author" content="Jeffrey S. Racine">
   <title>Nonparametric Workshop</title>
@@ -923,8 +923,8 @@ f_H(x)=\frac{1}{nh}\sum_{i=1}^n\mathbf{1}(X_i\text{ is in the same bin as }x)
 <h2>Smooth Joint Density Estimation</h2>
 <ul>
 <li class="fragment"><p>Skipping technical derivations, in the multivariate case we can show that <span class="math display">\[\begin{equation*}
-    \operatorname{bias}\hat f(x) \approx \sum_{s=1}^q \frac{h_s^2}{2}f_{ss}(x)\kappa_2
-  \end{equation*}\]</span> where again <span class="math inline">\(\kappa_2 = \int z^2 K(z)\, dz\)</span> and <span class="math inline">\(f_{ss}(x)\)</span> is the second-order derivative of <span class="math inline">\(f(x)\)</span> with respect to <span class="math inline">\(x_s\)</span></p></li>
+    \operatorname{bias}\hat f(x) \approx \sum_{s=1}^q \frac{h_s^2}{2}f_{ss}(x)\kappa_2,
+  \end{equation*}\]</span> based on a <em>second order kernel</em> where <span class="math inline">\(0&lt; \kappa_2 = \int z^2 K(z)\, dz&lt;\infty\)</span>, where <span class="math inline">\(f_{ss}(x)\)</span> is the second-order derivative of <span class="math inline">\(f(x)\)</span> with respect to <span class="math inline">\(x_s\)</span></p></li>
 <li class="fragment"><p>We can also show in the multivariate case that <span class="math display">\[\begin{equation*}
     \operatorname{var} \hat f(x)\approx \frac{f(x)\kappa^q}{n\prod_{s=1}^qh_s}
   \end{equation*}\]</span></p></li>
