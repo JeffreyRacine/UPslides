@@ -1222,14 +1222,14 @@ g(x)=\int y\frac{f(y,x)}{f(x)}\,dy=\frac{m(x)}{f(x)}
 <h2>Nonparametric Regression</h2>
 <ul>
 <li class="fragment"><p>For <span class="math inline">\(Y\in\mathbb{R}\)</span> and <span class="math inline">\(X\in\mathbb{R}^1\)</span> (i.e., <span class="math inline">\(q=1\)</span>), we estimate <span class="math inline">\(g(x)\)</span> by</p>
-<ol type="1">
+<ul>
 <li class="fragment"><p>replacing the unknown <span class="math inline">\(f(x)\)</span> in <span class="math inline">\(\eqref{g(x)}\)</span> with <span class="math display">\[\begin{equation*}
 \hat f(x)=\frac{1}{nh}\sum_{i=1}^n K\left(\frac{x-X_i}{h}\right)
 \end{equation*}\]</span></p></li>
 <li class="fragment"><p>replacing the unknown <span class="math inline">\(f(y,x)\)</span> in <span class="math inline">\(\eqref{g(x)}\)</span> with <span class="math display">\[\begin{equation*}
 \hat f(y,x)=\frac{1}{nh_yh}\sum_{i=1}^n K\left(\frac{y-Y_i}{h_y}\right)K\left(\frac{x-X_i}{h}\right)
 \end{equation*}\]</span></p></li>
-</ol></li>
+</ul></li>
 </ul>
 </section>
 <section id="nonparametric-regression-4" class="slide level2 center">
@@ -1263,14 +1263,14 @@ y=\hat g(x)+\hat\epsilon
 <section id="nonparametric-regression-5" class="slide level2 center">
 <h2>Nonparametric Regression</h2>
 <ul>
-<li class="fragment"><p>The pointwise bias (using a <em>second order kernel</em>, i.e., <span class="math inline">\(\kappa_2\ne0\)</span>, when <span class="math inline">\(X\in\mathbb{R}^1\)</span>) is <span class="math display">\[\begin{equation*}
+<li class="fragment"><p>The pointwise bias (using a <em>second order kernel</em>, i.e., <span class="math inline">\(\kappa_2\ne0\)</span>, univariate <span class="math inline">\(X\in\mathbb{R}^1\)</span>) is <span class="math display">\[\begin{equation*}
     \operatorname{bias}\hat g(x)\approx \frac{h^2}{2f(x)}\left\{2g'(x)f'(x)+g^{''}(x)f(x)\right\}\kappa_2
   \end{equation*}\]</span></p></li>
-<li class="fragment"><p>The pointwise variance (univariate <span class="math inline">\(X\)</span>) is <span class="math display">\[\begin{equation*}
+<li class="fragment"><p>The pointwise variance (univariate <span class="math inline">\(X\in\mathbb{R}^1\)</span>) is <span class="math display">\[\begin{equation*}
     \operatorname{var}\hat g(x)
     \approx\frac{\sigma^2(x)}{nhf(x)}\kappa
   \end{equation*}\]</span></p></li>
-<li class="fragment"><p>The bias once again falls as <span class="math inline">\(h\)</span> decreases, while variance again rises as <span class="math inline">\(h\)</span> decreases</p></li>
+<li class="fragment"><p>The bias once again falls as <span class="math inline">\(h\)</span> decreases, while variance again rises as <span class="math inline">\(h\)</span> decreases (just as in univariate kernel density estimation)</p></li>
 </ul>
 </section>
 <section id="data-driven-bandwidth-selection-2" class="slide level2 center">
@@ -1517,35 +1517,27 @@ y=\hat g(x)+\hat\epsilon
 </section>
 <section id="multivariate-nonparametric-regression" class="slide level2 smaller center">
 <h2>Multivariate Nonparametric Regression</h2>
-<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/wage1summary_5c5a1c6d78a1f77ef2ac9c028396d9a9">
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/wage1summary_8035b43a262fdb3b6a39e745fe50c405">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="fu">library</span>(np)</span>
 <span id="cb10-2"><a href="#cb10-2"></a><span class="fu">data</span>(wage1)</span>
-<span id="cb10-3"><a href="#cb10-3"></a>?wage1</span>
-<span id="cb10-4"><a href="#cb10-4"></a><span class="do">## Help on topic 'wage1' was found in the following packages:</span></span>
-<span id="cb10-5"><a href="#cb10-5"></a><span class="do">## </span></span>
-<span id="cb10-6"><a href="#cb10-6"></a><span class="do">##   Package               Library</span></span>
-<span id="cb10-7"><a href="#cb10-7"></a><span class="do">##   crs                   /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/library</span></span>
-<span id="cb10-8"><a href="#cb10-8"></a><span class="do">##   np                    /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/library</span></span>
-<span id="cb10-9"><a href="#cb10-9"></a><span class="do">## </span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="do">## For details see ?wage1</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a>ghat <span class="ot">&lt;-</span> <span class="fu">npreg</span>(lwage <span class="sc">~</span> female <span class="sc">+</span> married <span class="sc">+</span> educ <span class="sc">+</span> exper <span class="sc">+</span> tenure, <span class="at">data=</span>wage1, <span class="at">regtype=</span><span class="st">"ll"</span>)</span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="fu">summary</span>(ghat)</span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="do">## </span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="do">## Regression Data: 526 training points, in 5 variable(s)</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="do">##                     female   married     educ    exper   tenure</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="do">## Bandwidth(s): 1.836551e-08 0.2880919 5.149588 7.185839 28.01246</span></span>
 <span id="cb10-10"><a href="#cb10-10"></a><span class="do">## </span></span>
-<span id="cb10-11"><a href="#cb10-11"></a><span class="do">## Using the first match ...</span></span>
-<span id="cb10-12"><a href="#cb10-12"></a>ghat <span class="ot">&lt;-</span> <span class="fu">npreg</span>(lwage <span class="sc">~</span> female <span class="sc">+</span> married <span class="sc">+</span> educ <span class="sc">+</span> exper <span class="sc">+</span> tenure, <span class="at">data=</span>wage1, <span class="at">regtype=</span><span class="st">"ll"</span>)</span>
-<span id="cb10-13"><a href="#cb10-13"></a><span class="fu">summary</span>(ghat)</span>
-<span id="cb10-14"><a href="#cb10-14"></a><span class="do">## </span></span>
-<span id="cb10-15"><a href="#cb10-15"></a><span class="do">## Regression Data: 526 training points, in 5 variable(s)</span></span>
-<span id="cb10-16"><a href="#cb10-16"></a><span class="do">##                     female  married     educ    exper   tenure</span></span>
-<span id="cb10-17"><a href="#cb10-17"></a><span class="do">## Bandwidth(s): 1.613829e-07 0.288114 5.148766 7.185586 28.00388</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a><span class="do">## Kernel Regression Estimator: Local-Linear</span></span>
+<span id="cb10-12"><a href="#cb10-12"></a><span class="do">## Bandwidth Type: Fixed</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a><span class="do">## Residual standard error: 0.3682319</span></span>
+<span id="cb10-14"><a href="#cb10-14"></a><span class="do">## R-squared: 0.5204119</span></span>
+<span id="cb10-15"><a href="#cb10-15"></a><span class="do">## </span></span>
+<span id="cb10-16"><a href="#cb10-16"></a><span class="do">## Continuous Kernel Type: Second-Order Gaussian</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a><span class="do">## No. Continuous Explanatory Vars.: 3</span></span>
 <span id="cb10-18"><a href="#cb10-18"></a><span class="do">## </span></span>
-<span id="cb10-19"><a href="#cb10-19"></a><span class="do">## Kernel Regression Estimator: Local-Linear</span></span>
-<span id="cb10-20"><a href="#cb10-20"></a><span class="do">## Bandwidth Type: Fixed</span></span>
-<span id="cb10-21"><a href="#cb10-21"></a><span class="do">## Residual standard error: 0.3682301</span></span>
-<span id="cb10-22"><a href="#cb10-22"></a><span class="do">## R-squared: 0.5204168</span></span>
-<span id="cb10-23"><a href="#cb10-23"></a><span class="do">## </span></span>
-<span id="cb10-24"><a href="#cb10-24"></a><span class="do">## Continuous Kernel Type: Second-Order Gaussian</span></span>
-<span id="cb10-25"><a href="#cb10-25"></a><span class="do">## No. Continuous Explanatory Vars.: 3</span></span>
-<span id="cb10-26"><a href="#cb10-26"></a><span class="do">## </span></span>
-<span id="cb10-27"><a href="#cb10-27"></a><span class="do">## Unordered Categorical Kernel Type: Aitchison and Aitken</span></span>
-<span id="cb10-28"><a href="#cb10-28"></a><span class="do">## No. Unordered Categorical Explanatory Vars.: 2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-19"><a href="#cb10-19"></a><span class="do">## Unordered Categorical Kernel Type: Aitchison and Aitken</span></span>
+<span id="cb10-20"><a href="#cb10-20"></a><span class="do">## No. Unordered Categorical Explanatory Vars.: 2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="partial-regression-plots" class="slide level2 smaller center">
@@ -1629,8 +1621,8 @@ with + measure}
 <span id="cb14-5"><a href="#cb14-5"></a><span class="do">## Explanatory variables tested for significance:</span></span>
 <span id="cb14-6"><a href="#cb14-6"></a><span class="do">## female (1), married (2), educ (3), exper (4), tenure (5)</span></span>
 <span id="cb14-7"><a href="#cb14-7"></a><span class="do">## </span></span>
-<span id="cb14-8"><a href="#cb14-8"></a><span class="do">##                     female  married     educ    exper   tenure</span></span>
-<span id="cb14-9"><a href="#cb14-9"></a><span class="do">## Bandwidth(s): 1.613829e-07 0.288114 5.148766 7.185586 28.00388</span></span>
+<span id="cb14-8"><a href="#cb14-8"></a><span class="do">##                     female   married     educ    exper   tenure</span></span>
+<span id="cb14-9"><a href="#cb14-9"></a><span class="do">## Bandwidth(s): 1.836551e-08 0.2880919 5.149588 7.185839 28.01246</span></span>
 <span id="cb14-10"><a href="#cb14-10"></a><span class="do">## </span></span>
 <span id="cb14-11"><a href="#cb14-11"></a><span class="do">## Individual Significance Tests</span></span>
 <span id="cb14-12"><a href="#cb14-12"></a><span class="do">## P Value: </span></span>
@@ -1665,7 +1657,7 @@ with + measure}
 <span id="cb15-8"><a href="#cb15-8"></a><span class="do">##   female    married educ tenure exper</span></span>
 <span id="cb15-9"><a href="#cb15-9"></a><span class="do">## 1   Male Notmarried   12      2  13.5</span></span>
 <span id="cb15-10"><a href="#cb15-10"></a><span class="fu">predict</span>(ghat, <span class="at">newdata=</span>df)</span>
-<span id="cb15-11"><a href="#cb15-11"></a><span class="do">## [1] 1.699062</span></span>
+<span id="cb15-11"><a href="#cb15-11"></a><span class="do">## [1] 1.69906</span></span>
 <span id="cb15-12"><a href="#cb15-12"></a><span class="do">## Or you could use ghat &lt;- npreg(...,newdata=df) and fitted(ghat) </span></span>
 <span id="cb15-13"><a href="#cb15-13"></a><span class="do">## ghat &lt;- npreg(lwage ~ female + married + educ + exper + tenure, </span></span>
 <span id="cb15-14"><a href="#cb15-14"></a><span class="do">##               data=wage1,</span></span>

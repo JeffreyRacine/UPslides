@@ -39,12 +39,12 @@
 
 - For $Y\in\mathbb{R}$ and $X\in\mathbb{R}^1$ (i.e., $q=1$), we estimate $g(x)$ by 
 
-    1. replacing the unknown $f(x)$ in \eqref{g(x)} with
+    - replacing the unknown $f(x)$ in \eqref{g(x)} with
 \begin{equation*}
   \hat f(x)=\frac{1}{nh}\sum_{i=1}^n K\left(\frac{x-X_i}{h}\right)
   \end{equation*}
   
-    1. replacing the unknown $f(y,x)$ in \eqref{g(x)} with
+    - replacing the unknown $f(y,x)$ in \eqref{g(x)} with
 \begin{equation*}
   \hat f(y,x)=\frac{1}{nh_yh}\sum_{i=1}^n K\left(\frac{y-Y_i}{h_y}\right)K\left(\frac{x-X_i}{h}\right)
   \end{equation*}
@@ -74,19 +74,19 @@ we replace $K((x-X_i)/h)$ with $K_\gamma(X_i,x)$ defined previously (we will ret
 
 ## Nonparametric Regression
 
-- The pointwise bias  (using a *second order kernel*, i.e.,
-    $\kappa_2\ne0$, when $X\in\mathbb{R}^1$) is
+- The pointwise bias (using a *second order kernel*, i.e.,
+    $\kappa_2\ne0$, univariate $X\in\mathbb{R}^1$) is
     \begin{equation*}
       \operatorname{bias}\hat g(x)\approx \frac{h^2}{2f(x)}\left\{2g'(x)f'(x)+g^{''}(x)f(x)\right\}\kappa_2
     \end{equation*}
 
-- The pointwise variance (univariate $X$) is
+- The pointwise variance (univariate $X\in\mathbb{R}^1$) is
     \begin{equation*}
       \operatorname{var}\hat g(x)
       \approx\frac{\sigma^2(x)}{nhf(x)}\kappa
     \end{equation*}
 
-- The bias once again falls as $h$ decreases, while variance again rises as $h$ decreases
+- The bias once again falls as $h$ decreases, while variance again rises as $h$ decreases (just as in univariate kernel density estimation)
 
 ## Data-Driven Bandwidth Selection
 
@@ -322,7 +322,7 @@ legend("topleft",c("Kernel ME","DGP ME","Linear ME"),col=1:3,lty=1,bty="n")
 #| echo: true
 library(np)
 data(wage1)
-?wage1
+## For details see ?wage1
 ghat <- npreg(lwage ~ female + married + educ + exper + tenure, data=wage1, regtype="ll")
 summary(ghat)
 ```
