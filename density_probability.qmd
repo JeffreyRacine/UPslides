@@ -317,7 +317,7 @@ plot(x,dnorm(x,mean=mean(x),sd=sd(x)),type="l",ylab="Parametric Density Estimate
 
 - Note that the constant $c$ depends on $f^{''}(x)$ and $K(z)$ (the latter we know and can compute, the former is unknown)
 
-## Smooth Univariate Density Estimation
+## Data-Driven Bandwidth Selection
 
 - Likelihood cross validation is a popular data-driven method that  chooses $h$ to *maximize* the (leave-one-out) log likelihood function
     \begin{equation*}
@@ -332,7 +332,7 @@ plot(x,dnorm(x,mean=mean(x),sd=sd(x)),type="l",ylab="Parametric Density Estimate
     
 - See the option `bwmethod="cv.ml"` in the R package np
 
-## Smooth Univariate Density Estimation
+## Data-Driven Bandwidth Selection
 
 - Least squares cross validation is another data-driven method based on the principle of choosing $h$ to *minimize* the integrated square error of the resulting estimate
 

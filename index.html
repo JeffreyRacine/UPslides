@@ -865,8 +865,8 @@ f_H(x)=\frac{1}{nh}\sum_{i=1}^n\mathbf{1}(X_i\text{ is in the same bin as }x)
 <li class="fragment"><p>Note that the constant <span class="math inline">\(c\)</span> depends on <span class="math inline">\(f^{''}(x)\)</span> and <span class="math inline">\(K(z)\)</span> (the latter we know and can compute, the former is unknown)</p></li>
 </ul>
 </section>
-<section id="smooth-univariate-density-estimation-5" class="slide level2 center">
-<h2>Smooth Univariate Density Estimation</h2>
+<section id="data-driven-bandwidth-selection" class="slide level2 center">
+<h2>Data-Driven Bandwidth Selection</h2>
 <ul>
 <li class="fragment"><p>Likelihood cross validation is a popular data-driven method that chooses <span class="math inline">\(h\)</span> to <em>maximize</em> the (leave-one-out) log likelihood function <span class="math display">\[\begin{equation*}
     \mathcal{L} = \log\, L = \sum_{i=1}^n \log\, \hat f_{-i}(X_i)
@@ -877,8 +877,8 @@ f_H(x)=\frac{1}{nh}\sum_{i=1}^n\mathbf{1}(X_i\text{ is in the same bin as }x)
 <li class="fragment"><p>See the option <code>bwmethod="cv.ml"</code> in the R package np</p></li>
 </ul>
 </section>
-<section id="smooth-univariate-density-estimation-6" class="slide level2 center">
-<h2>Smooth Univariate Density Estimation</h2>
+<section id="data-driven-bandwidth-selection-1" class="slide level2 center">
+<h2>Data-Driven Bandwidth Selection</h2>
 <ul>
 <li class="fragment"><p>Least squares cross validation is another data-driven method based on the principle of choosing <span class="math inline">\(h\)</span> to <em>minimize</em> the integrated square error of the resulting estimate</p></li>
 <li class="fragment"><p>The integrated squared difference between <span class="math inline">\(\hat f\)</span> and <span class="math inline">\(f\)</span>, i.e., <span class="math inline">\(\int (\hat f(x) - f(x))^2\, dx\)</span>, is <span class="math display">\[\begin{equation*}
@@ -888,7 +888,7 @@ f_H(x)=\frac{1}{nh}\sum_{i=1}^n\mathbf{1}(X_i\text{ is in the same bin as }x)
 <li class="fragment"><p>See the option <code>bwmethod="cv.ls"</code> in the R package np</p></li>
 </ul>
 </section>
-<section id="smooth-univariate-density-estimation-7" class="slide level2 center">
+<section id="smooth-univariate-density-estimation-5" class="slide level2 center">
 <h2>Smooth Univariate Density Estimation</h2>
 <div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/npudenseruptions_41604006ce9a865d7a5ef2dc936d408c">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">library</span>(np)</span>
@@ -1271,7 +1271,7 @@ y=\hat g(x)+\hat\epsilon
 <li class="fragment"><p>The bias once again falls as <span class="math inline">\(h\)</span> decreases, while variance again rises as <span class="math inline">\(h\)</span> decreases</p></li>
 </ul>
 </section>
-<section id="data-driven-bandwidth-selection" class="slide level2 center">
+<section id="data-driven-bandwidth-selection-2" class="slide level2 center">
 <h2>Data-Driven Bandwidth Selection</h2>
 <ul>
 <li class="fragment"><p>How one selects the bandwidth <span class="math inline">\(h\)</span> is a key aspect to sound nonparametric analysis, and cross-validation methods are powerful data-driven solutions</p></li>
@@ -1282,7 +1282,7 @@ y=\hat g(x)+\hat\epsilon
 \end{equation*}\]</span> where <span class="math inline">\(\hat g_{-i}(X_i) =\sum_{l\neq i}^n Y_l K_\gamma(X_i,x)/\sum_{l\neq i}^n K_\gamma(X_i,x)\)</span> is the leave-one-out kernel estimator of <span class="math inline">\(g(X_i)\)</span>, and <span class="math inline">\(0\leq M(\cdot)\leq 1\)</span> is a weight function which serves to avoid difficulties caused by dividing by zero, or by the slow convergence rate caused by boundary effects</p></li>
 </ul>
 </section>
-<section id="data-driven-bandwidth-selection-1" class="slide level2 center">
+<section id="data-driven-bandwidth-selection-3" class="slide level2 center">
 <h2>Data-Driven Bandwidth Selection</h2>
 <ul>
 <li class="fragment"><p>Generalized cross-validation was proposed by <span class="citation" data-cites="CRAVEN_WAHBA:1979">Craven and Wahba (<a href="#/references-scrollable" role="doc-biblioref" onclick="">1979</a>)</span></p></li>
@@ -1295,7 +1295,7 @@ y=\hat g(x)+\hat\epsilon
 <li class="fragment"><p>Both <span class="math inline">\(CV(h)\)</span> and <span class="math inline">\(GCV(h)\)</span> are consistent estimates of the MISE of <span class="math inline">\(\hat g(x)\)</span></p></li>
 </ul>
 </section>
-<section id="data-driven-bandwidth-selection-2" class="slide level2 center">
+<section id="data-driven-bandwidth-selection-4" class="slide level2 center">
 <h2>Data-Driven Bandwidth Selection</h2>
 <ul>
 <li class="fragment"><p><span class="citation" data-cites="HURVICH_SIMONOFF_TSAI:1998">Hurvich, Simonoff, and Tsai (<a href="#/references-scrollable" role="doc-biblioref" onclick="">1998</a>)</span> proposed an improved information criterion based on minimization of <span class="math display">\[\begin{equation*}
@@ -1310,7 +1310,7 @@ y=\hat g(x)+\hat\epsilon
 <li class="fragment"><p>The dataset consists of <span class="math inline">\(n=102\)</span> observations. The dependent variable is the prestige of Canadian occupations (`Pineo-Porter score’) and the explanatory variable is average income for each occupation measured in 1971 Canadian dollars</p></li>
 </ul>
 </section>
-<section id="data-driven-bandwidth-selection-3" class="slide level2 center">
+<section id="data-driven-bandwidth-selection-5" class="slide level2 center">
 <h2>Data-Driven Bandwidth Selection</h2>
 
 <img data-src="index_files/figure-revealjs/prestige-1.png" width="960" class="r-stretch quarto-figure-center"></section>
