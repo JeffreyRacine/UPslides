@@ -8,7 +8,7 @@
 <link href="index_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="index_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.427">
+  <meta name="generator" content="quarto-1.3.433">
 
   <meta name="author" content="Jeffrey S. Racine">
   <title>Nonparametric Workshop</title>
@@ -1792,21 +1792,21 @@ with + measure}
 </section>
 <section id="nonparametric-ar-models-1" class="slide level2 center">
 <h2>Nonparametric AR Models</h2>
-<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/arimatsnpregcode_c116e62201428aaecfbc56a6c97b4406">
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/arimatsnpregcode_da77653b41bc5c06597f61ef2356d8ec">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="fu">library</span>(np)</span>
 <span id="cb20-2"><a href="#cb20-2"></a><span class="do">## Simulate data from a stationary univariate AR(1) process</span></span>
 <span id="cb20-3"><a href="#cb20-3"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
 <span id="cb20-4"><a href="#cb20-4"></a>n <span class="ot">&lt;-</span> <span class="dv">100</span></span>
 <span id="cb20-5"><a href="#cb20-5"></a>y <span class="ot">&lt;-</span> <span class="fu">arima.sim</span>(<span class="at">n =</span> n, <span class="fu">list</span>(<span class="at">ar =</span> <span class="fu">c</span>(<span class="fl">0.9</span>)))</span>
 <span id="cb20-6"><a href="#cb20-6"></a><span class="do">## Conduct local constant estimation of y on four lags</span></span>
-<span id="cb20-7"><a href="#cb20-7"></a>ghat<span class="fl">.4</span> <span class="ot">&lt;-</span> <span class="fu">npreg</span>(y<span class="sc">~</span><span class="fu">lag</span>(y,<span class="sc">-</span><span class="dv">1</span>)<span class="sc">+</span><span class="fu">lag</span>(y,<span class="sc">-</span><span class="dv">2</span>)<span class="sc">+</span><span class="fu">lag</span>(y,<span class="sc">-</span><span class="dv">3</span>)<span class="sc">+</span><span class="fu">lag</span>(y,<span class="sc">-</span><span class="dv">4</span>))</span>
+<span id="cb20-7"><a href="#cb20-7"></a>ghat.<span class="fl">4.</span>lags <span class="ot">&lt;-</span> <span class="fu">npreg</span>(y<span class="sc">~</span><span class="fu">lag</span>(y,<span class="sc">-</span><span class="dv">1</span>)<span class="sc">+</span><span class="fu">lag</span>(y,<span class="sc">-</span><span class="dv">2</span>)<span class="sc">+</span><span class="fu">lag</span>(y,<span class="sc">-</span><span class="dv">3</span>)<span class="sc">+</span><span class="fu">lag</span>(y,<span class="sc">-</span><span class="dv">4</span>))</span>
 <span id="cb20-8"><a href="#cb20-8"></a><span class="do">## Re-fit the model using only 1 lag</span></span>
-<span id="cb20-9"><a href="#cb20-9"></a>ghat<span class="fl">.1</span> <span class="ot">&lt;-</span> <span class="fu">npreg</span>(y<span class="sc">~</span><span class="fu">lag</span>(y,<span class="sc">-</span><span class="dv">1</span>))</span>
-<span id="cb20-10"><a href="#cb20-10"></a><span class="do">## cbind(ts(fitted(ghat.4),start=5),ts(fitted(ghat.1),start=2))</span></span>
+<span id="cb20-9"><a href="#cb20-9"></a>ghat.<span class="fl">1.</span>lag <span class="ot">&lt;-</span> <span class="fu">npreg</span>(y<span class="sc">~</span><span class="fu">lag</span>(y,<span class="sc">-</span><span class="dv">1</span>))</span>
+<span id="cb20-10"><a href="#cb20-10"></a><span class="do">## cbind(ts(fitted(ghat.4.lags),start=5),ts(fitted(ghat.1.lag),start=2))</span></span>
 <span id="cb20-11"><a href="#cb20-11"></a><span class="do">## Plot the data and nonparametric fit</span></span>
 <span id="cb20-12"><a href="#cb20-12"></a><span class="fu">plot</span>(y,<span class="at">lwd=</span><span class="dv">2</span>)</span>
-<span id="cb20-13"><a href="#cb20-13"></a><span class="fu">lines</span>(<span class="fu">ts</span>(<span class="fu">fitted</span>(ghat<span class="fl">.4</span>),<span class="at">start=</span><span class="dv">5</span>),<span class="at">col=</span><span class="dv">2</span>,<span class="at">lty=</span><span class="dv">2</span>,<span class="at">lwd=</span><span class="dv">2</span>)</span>
-<span id="cb20-14"><a href="#cb20-14"></a><span class="fu">points</span>(<span class="fu">ts</span>(<span class="fu">fitted</span>(ghat<span class="fl">.1</span>),<span class="at">start=</span><span class="dv">2</span>),<span class="at">col=</span><span class="dv">3</span>)</span>
+<span id="cb20-13"><a href="#cb20-13"></a><span class="fu">lines</span>(<span class="fu">ts</span>(<span class="fu">fitted</span>(ghat.<span class="fl">4.</span>lags),<span class="at">start=</span><span class="dv">5</span>),<span class="at">col=</span><span class="dv">2</span>,<span class="at">lty=</span><span class="dv">2</span>,<span class="at">lwd=</span><span class="dv">2</span>)</span>
+<span id="cb20-14"><a href="#cb20-14"></a><span class="fu">points</span>(<span class="fu">ts</span>(<span class="fu">fitted</span>(ghat.<span class="fl">1.</span>lag),<span class="at">start=</span><span class="dv">2</span>),<span class="at">col=</span><span class="dv">3</span>)</span>
 <span id="cb20-15"><a href="#cb20-15"></a><span class="fu">legend</span>(<span class="st">"topright"</span>,<span class="fu">c</span>(<span class="st">"Series"</span>,</span>
 <span id="cb20-16"><a href="#cb20-16"></a>                    <span class="st">"npreg() including 4 lags"</span>,</span>
 <span id="cb20-17"><a href="#cb20-17"></a>                    <span class="st">"npreg() including 1 lag"</span>),</span>
@@ -1819,9 +1819,9 @@ with + measure}
 <img data-src="index_files/figure-revealjs/fig-arimatsnpreg-1.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;2: Local constant estimation of a stationary univariate AR(1) time series, <span class="math inline">\(Y_t=0.9Y_{t-1}+\epsilon_t\)</span></p></section>
 <section id="nonparametric-ar-models-3" class="slide level2 center">
 <h2>Nonparametric AR Models</h2>
-<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/oahetagewpq_890ef657a4e146762ee4b13ea70a9cc9">
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/oahetagewpq_b63c81c8e1836e0881845fed856ca822">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="do">## Examine the model summary</span></span>
-<span id="cb21-2"><a href="#cb21-2"></a><span class="fu">summary</span>(ghat<span class="fl">.4</span>)</span>
+<span id="cb21-2"><a href="#cb21-2"></a><span class="fu">summary</span>(ghat.<span class="fl">4.</span>lags)</span>
 <span id="cb21-3"><a href="#cb21-3"></a><span class="do">## </span></span>
 <span id="cb21-4"><a href="#cb21-4"></a><span class="do">## Regression Data: 96 training points, in 4 variable(s)</span></span>
 <span id="cb21-5"><a href="#cb21-5"></a><span class="do">##               lag(y, -1) lag(y, -2) lag(y, -3) lag(y, -4)</span></span>
@@ -1878,9 +1878,9 @@ with + measure}
 </section>
 <section id="nonparametric-ar-models-lag-inference" class="slide level2 center">
 <h2>Nonparametric AR Models (Lag Inference)</h2>
-<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/arimatsnpregsig_5c6e73d1d82c1d8c23a0671d41ccaafe">
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/arimatsnpregsig_0ab07cfc5301b654f3414a3bfe20143b">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="do">## Conduct a nonparametric significance test</span></span>
-<span id="cb22-2"><a href="#cb22-2"></a><span class="fu">npsigtest</span>(ghat<span class="fl">.4</span>)</span>
+<span id="cb22-2"><a href="#cb22-2"></a><span class="fu">npsigtest</span>(ghat.<span class="fl">4.</span>lags)</span>
 <span id="cb22-3"><a href="#cb22-3"></a><span class="do">## </span></span>
 <span id="cb22-4"><a href="#cb22-4"></a><span class="do">## Kernel Regression Significance Test</span></span>
 <span id="cb22-5"><a href="#cb22-5"></a><span class="do">## Type I Test with IID Bootstrap (399 replications, Pivot = TRUE, joint = FALSE)</span></span>
@@ -1947,7 +1947,7 @@ with + measure}
 <span id="cb24-23"><a href="#cb24-23"></a><span class="do">## Multiple R-squared: 0.812</span></span>
 <span id="cb24-24"><a href="#cb24-24"></a><span class="do">## Cross-validation score: 0.84938168</span></span>
 <span id="cb24-25"><a href="#cb24-25"></a><span class="do">## Number of multistarts: 5</span></span>
-<span id="cb24-26"><a href="#cb24-26"></a><span class="do">## Estimation time: 15.1 seconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-26"><a href="#cb24-26"></a><span class="do">## Estimation time: 15.2 seconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="nonparametric-ar-models-10" class="slide level2 center">
@@ -3121,7 +3121,7 @@ Yu, Keming, and M. C. Jones. 2004. <span>“Likelihood-Based Local Linear Estima
 'autoAnimateUnmatched': true,
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
-'multiplex': {"secret":null,"id":"1d6536f47f6e3640","url":"https://reveal-multiplex.glitch.me/"},
+'multiplex': {"secret":null,"id":"775d824ec7014bd2","url":"https://reveal-multiplex.glitch.me/"},
 'smaller': false,
  
         // Display controls in the bottom right corner

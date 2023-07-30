@@ -132,14 +132,14 @@ set.seed(42)
 n <- 100
 y <- arima.sim(n = n, list(ar = c(0.9)))
 ## Conduct local constant estimation of y on four lags
-ghat.4 <- npreg(y~lag(y,-1)+lag(y,-2)+lag(y,-3)+lag(y,-4))
+ghat.4.lags <- npreg(y~lag(y,-1)+lag(y,-2)+lag(y,-3)+lag(y,-4))
 ## Re-fit the model using only 1 lag
-ghat.1 <- npreg(y~lag(y,-1))
-## cbind(ts(fitted(ghat.4),start=5),ts(fitted(ghat.1),start=2))
+ghat.1.lag <- npreg(y~lag(y,-1))
+## cbind(ts(fitted(ghat.4.lags),start=5),ts(fitted(ghat.1.lag),start=2))
 ## Plot the data and nonparametric fit
 plot(y,lwd=2)
-lines(ts(fitted(ghat.4),start=5),col=2,lty=2,lwd=2)
-points(ts(fitted(ghat.1),start=2),col=3)
+lines(ts(fitted(ghat.4.lags),start=5),col=2,lty=2,lwd=2)
+points(ts(fitted(ghat.1.lag),start=2),col=3)
 legend("topright",c("Series",
                     "npreg() including 4 lags",
                     "npreg() including 1 lag"),
@@ -158,14 +158,14 @@ set.seed(42)
 n <- 100
 y <- arima.sim(n = n, list(ar = c(0.9)))
 ## Conduct local constant estimation of y on four lags
-ghat.4 <- npreg(y~lag(y,-1)+lag(y,-2)+lag(y,-3)+lag(y,-4))
+ghat.4.lags <- npreg(y~lag(y,-1)+lag(y,-2)+lag(y,-3)+lag(y,-4))
 ## Re-fit the model using only 1 lag
-ghat.1 <- npreg(y~lag(y,-1))
-## cbind(ts(fitted(ghat.4),start=5),ts(fitted(ghat.1),start=2))
+ghat.1.lag <- npreg(y~lag(y,-1))
+## cbind(ts(fitted(ghat.4.lags),start=5),ts(fitted(ghat.1.lag),start=2))
 ## Plot the data and nonparametric fit
 plot(y,lwd=2)
-lines(ts(fitted(ghat.4),start=5),col=2,lty=2,lwd=2)
-points(ts(fitted(ghat.1),start=2),col=3)
+lines(ts(fitted(ghat.4.lags),start=5),col=2,lty=2,lwd=2)
+points(ts(fitted(ghat.1.lag),start=2),col=3)
 legend("topright",c("Series",
                     "npreg() including 4 lags",
                     "npreg() including 1 lag"),
@@ -176,7 +176,7 @@ legend("topright",c("Series",
 
 ```{r oahetagewpq,echo=TRUE}
 ## Examine the model summary
-summary(ghat.4)
+summary(ghat.4.lags)
 ```
 
 ## Nonparametric AR Models
@@ -229,7 +229,7 @@ summary(ghat.4)
 ```{r arimatsnpregsig}
 #| echo: true
 ## Conduct a nonparametric significance test
-npsigtest(ghat.4)
+npsigtest(ghat.4.lags)
 ```
 
 ## Nonparametric AR Models
