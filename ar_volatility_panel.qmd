@@ -1,0 +1,712 @@
+# Nonparametric Time-Series Modelling
+
+## R and Time-Series Data Types {.smaller}
+
+- In R, one can create time-series from numeric data representing data sampled at equispaced points in time
+
+- To do this, simply cast the data object as `ts()` (per the following example)
+
+- After this, R functions will act appropriately (e.g., `plot()` recognizes `ts()` so the horizontal axis is time, lines connect points, etc.)
+
+  ```{r tscasting}
+  #| echo: true
+  #| eval: false
+  ## Example 1 - create a simple time series that begins on the 2nd Quarter of
+  ## 1959
+  x <- ts(1:10, frequency = 4, start = c(1959, 2))
+  print(x)
+  plot(x)
+  ## Excample 2 - create simulated data from an ARIMA model that begins on the 2nd
+  ## Quarter of 1959
+  x <- ts(arima.sim(n = 10, list(ar = c(0.8897, -0.4858), 
+                                 ma = c(-0.2279, 0.2488)),
+                    sd = sqrt(0.1796)),
+          frequency = 4, start = c(1959, 2))
+  print(x)
+  plot(x)
+  ```
+  
+## R and Time-Series Data Types {.smaller}
+  
+- The function `lag()` shifts the time base back by a given number of observations
+
+  ```{r tslag}
+  #| echo: true
+  #| eval: false
+  ## ldeaths is monthly deaths from bronchitis, emphysema and asthma in the UK,
+  ## 1974–1979, both sexes
+  ldeaths
+  ## lag(x, k=1, ...), note the sign of k: a series lagged by a positive k, i.e.,
+  ## y_{t+k}
+  lag(ldeaths, 0) # returns original series y_t
+  lag(ldeaths, -1) # returns series lagged once y_{t-1}
+  lag(ldeaths, -2) # returns series lagged twice y_{t-2}
+  ## In matrix form compare to cbind(ldeaths,lag(ldeaths,-1),lag(ldeaths,-2))
+  cbind(ldeaths,lag(ldeaths,-1),lag(ldeaths,-2))
+  ```
+
+- The function `diff()` returns suitably lagged and iterated differences
+
+  ```{r tsdiff}
+  #| echo: true
+  #| eval: false
+  diff(ldeaths)
+  ## Manually compute first difference
+  ldeaths[2:length(ldeaths)]-ldeaths[1:(length(ldeaths)-1)]
+  ```
+  
+- So, you can see that by casting a univariate numeric vector as a time series via `ts()` it inherits certain properties that make subsequent analysis easier than otherwise
+
+- The R package `np` supports `ts()` data for a range of functions (we will investigate univariate *nonlinear* kernel models alongside *linear* parametric models)
+
+
+## R and Time-Series Data Types
+
+::: callout-important
+
+- It may take some time to grow accustomed to R and its implementation of `ts()` objects
+
+- Not all functions support `ts()` objects as one might expect
+
+- In particular, `lm()` (linear regression) will not work as some might expect, beware!
+
+  ```{r tsRlag}
+  #| echo: true
+  #| eval: false
+  library(np)
+  ## Simulate a simple AR(1) process with lag coefficient 0.9
+  set.seed(42)
+  y <- arima.sim(n = n, list(ar = c(0.9)))
+  ## Using lag() in lm() calls will fail (same result regardless of lag, R^2=1,
+  ## lag() is totally ignored so you are regressing y_t on y_t though naturally 
+  ## you may not suspect that is what would happen in this case)
+  ghat.ols <- lm(y~lag(y,-1))
+  summary(ghat.ols)
+  ## But if you manually regress numeric y_t on y_{t-1} you get the expected
+  ## result (try also ar.ols(y, order.max = 1) or arima(y, order = c(1,0,0))). 
+  ## Here we regress (y_t,...,y_2) on (y_{t-1},...,y_1) using numeric vectors
+  ghat.ols <- lm(y[2:length(y)]~y[1:(length(y)-1)])
+  summary(ghat.ols)
+  ## npreg() does support ts() objects. In the example below we use the npreg()
+  ## function to conduct simple OLS by noting that local linear regression with a
+  ## large bandwidth is linear least squares, so the gradient will be a vector of
+  ## constants equal to the least squares coefficient for lag(y,-1) - think of the
+  ## lag() function and notation y_{t-1} or "why tee minus one" hence the -1 here
+  ghat <- npreg(y~lag(y,-1),regtype="ll",bws=10^5,bandwidth.compute=FALSE,gradients=TRUE)
+  tail(gradients(ghat))
+  ```
+
+:::
+
+
+## Time Series Kernel Regression
+
+- The pointwise bias and variance formulas provided previously for kernel estimation were originally obtained in the i.i.d. setting
+
+- For *stationary* time series, the pointwise bias and variance expressions for density, conditional density, and conditional moment estimation are *identical* to those obtained for the i.i.d. case
+
+- For instance, for weakly dependent processes, $\hat g(x)$ has the same order MSE as for the i.i.d. case, and its asymptotic distribution is the same as that for the i.i.d. case
+
+- For the non-stationary case, see @racine_2019 for references and details
+
+## Nonparametric AR Models
+
+- For stationary time series, bandwidth selection, estimation, and inference can proceed in general *without modification*; only the non-stationary case requires a separate treatment, which is to be expected
+
+- The function `npreg()` in the R package np supports time series objects and the R `lag()` function can be used to generate the desired lags for a series, as the following code chunk illustrates
+
+- The figure on the following slide presents a simulated time series and the local constant kernel estimate
+
+- The DGP is given by $Y_t=0.9Y_{t-1}+\epsilon_t$, a linear stationary AR(1) process
+
+- Given the uncertainty regarding the appropriate lag order, we include four lags of $Y_t$ in the nonparametric model
+
+## Nonparametric AR Models
+
+```{r arimatsnpreg,fig.asp=0.65}
+#| echo: false
+#| label: fig-arimatsnpreg
+#| fig-cap: Local constant estimation of a stationary univariate AR(1) time series, $Y_t=0.9Y_{t-1}+\epsilon_t$
+library(np)
+## Simulate data from a stationary univariate AR(1) process
+set.seed(42)
+n <- 100
+y <- arima.sim(n = n, list(ar = c(0.9)))
+## Conduct local constant estimation of y on four lags
+ghat.4 <- npreg(y~lag(y,-1)+lag(y,-2)+lag(y,-3)+lag(y,-4))
+## Re-fit the model using only 1 lag
+ghat.1 <- npreg(y~lag(y,-1))
+## cbind(ts(fitted(ghat.4),start=5),ts(fitted(ghat.1),start=2))
+## Plot the data and nonparametric fit
+plot(y,lwd=2)
+lines(ts(fitted(ghat.4),start=5),col=2,lty=2,lwd=2)
+points(ts(fitted(ghat.1),start=2),col=3)
+legend("topright",c("Series",
+                    "npreg() including 4 lags",
+                    "npreg() including 1 lag"),
+                    lty=c(1,2,NA),col=1:3,lwd=c(2,2,NA),pch=c(NA,NA,1),bty="n")
+```
+
+## Nonparametric AR Models
+
+```{r oahetagewpq,echo=TRUE}
+## Examine the model summary
+summary(ghat.4)
+```
+
+## Nonparametric AR Models
+
+- Note how the bandwidths are large for lags that exceed 1, which arises because we are using the local constant estimator, cross-validated bandwidth selection, and a product kernel which jointly possess the ability to automatically remove irrelevant predictors without the need for pretesting [@HALL_LI_RACINE:2007]
+
+- If $h_k\to\infty$, then $K((Y_{t-k}-y_{t-k})/h_k)\to K(0)$, thus $\small \prod_{k=1}^4K((Y_{t-k}-y_{t-k})/h_k)=K((Y_{t-1}-y_{t-1})/h_1)K(0)^3$ hence
+\begin{equation*}
+\small
+\hat g(x)=\frac{\sum_{t=5}^tY_tK((Y_{t-1}-y_{t-1})/h_1)K(0)^3}{\sum_{t=5}^tK((Y_{t-1}-y_{t-1})/h_1)K(0)^3}
+=\frac{\sum_{t=5}^tY_tK((Y_{t-1}-y_{t-1})/h_1)}{\sum_{t=5}^tK((Y_{t-1}-y_{t-1})/h_1)}
+\end{equation*}
+
+- This then collapses to a one-predictor local constant kernel estimator, not a four-predictor estimator
+
+## Nonparametric AR Models
+
+- If lags 2, 3, and 4 are irrelevant and if the cross-validated $\hat h_2$, $\hat h_3$, and $\hat h_4$ are large, then cross-validation has reduced a four-dimensional nonparametric estimator to a one-dimensional one possessing a (fast) one-dimensional rate of convergence
+
+- The intuition underlying this feature is straightforward
+
+- If a predictor is irrelevant but unknowingly included in a local constant regression, there is no bias arising from its presence
+
+- The estimator bias with respect to this predictor is the same regardless of the size of the bandwidth
+
+- However, the noise arising from the presence of this predictor increases the overall variability of the estimator
+
+- The variance falls the larger is the bandwidth associated with this predictor
+
+## Nonparametric AR Models
+
+- Since cross-validation optimizes the square-error properties of the estimator, it is optimal to assign a large value of the bandwidth to this predictor since this does not affect bias but reduces overall variability, which essentially removes it from the resulting estimate as described above
+
+- Cross-validation can differentiate the relevant from the irrelevant predictors by oversmoothing the latter and optimally smoothing the former, and is one reason why we might not want to write-off the local constant estimator solely on the basis of the presence of boundary bias
+
+- In effect, local constant cross-validation is a dimensionality reduction procedure in the presence of irrelevant predictors, a feature not shared by its parametric counterparts
+
+## Nonparametric AR Models
+
+- The upshot is that even though we included four lags of $Y$ due to uncertainty about how many lags to incorporate, the cross-validated local constant estimator has in effect *smoothed out* lags 2, 3, and 4
+
+- This results in an estimator that in effect includes only the relevant predictor, which happens to be the first lag of $Y$
+
+- Applying the consistent test for parameter relevance detailed earlier indicates that lags 2, 3, and 4 are not relevant predictors, which is the case
+
+- Refitting the model with only one lag produces the same fit which confirms that both estimates use only one predictor
+
+## Nonparametric AR Models (Lag Inference) {.smaller}
+
+```{r arimatsnpregsig}
+#| echo: true
+## Conduct a nonparametric significance test
+npsigtest(ghat.4)
+```
+
+## Nonparametric AR Models
+
+- The generalized local polynomial estimator [@HALL_RACINE:2015] uses cross-validation to select the polynomial degree vector and bandwidth vector
+
+- In the case of the linear time series AR(1) DGP used above with lag and polynomial degree uncertainty, we examine how it performs
+
+- We will also fit a correctly specified parametric AR(1) model and compare the first few fitted values
+
+  ```{r npglpregtsar1}
+  #| echo: true
+  ## npglpreg() does not support time series objects, so we manually
+  ## create the lagged series
+  library(crs)
+  options(crs.messages=FALSE)
+  y.lag.1 <- c(rep(NA,1),y[1:(n-1)])
+  y.lag.2 <- c(rep(NA,2),y[1:(n-2)])
+  y.lag.3 <- c(rep(NA,3),y[1:(n-3)])
+  y.lag.4 <- c(rep(NA,4),y[1:(n-4)])
+  model <- npglpreg(y~y.lag.1+y.lag.2+y.lag.3+y.lag.4,nmulti=5,degree.max=5)
+  ```
+
+## Nonparametric AR Models {.smaller}
+
+```{r npglreuhaiteh}
+#| echo: true
+summary(model)
+```
+
+## Nonparametric AR Models
+
+```{r npglreuhaitehsdf}
+#| echo: false
+model.lm <- lm(y~y.lag.1,subset=5:n)
+```
+
+```{r npglreuhaitehsdfs}
+#| echo: true
+summary(model.lm)
+```
+
+## Nonparametric AR Models
+
+```{r npglreuhaitehsdfsps}
+#| echo: true
+## Examine the first few fitted values from the nonparametric and
+## linear AR(1) models
+cbind(fitted(model),fitted(model.lm))[1:10,]
+```
+
+## Nonparametric AR Models
+- This method correctly selects the degree for the first lag (the AR(1) process is a linear process, so the degree `r model$degree[1]` with a large bandwidth is appropriate)
+
+- It correctly selects a large bandwidth and a constant function (degree `r model$degree[2]`) for the remaining lags resulting in a globally linear model that is a function of the first lag of $Y$ only
+
+- Since the nonparametric model has effectively shrunk a four-dimensional object to what one would obtain using linear regression *and* knowing which lag to use, it has delivered a $\sqrt{n}$-consistent estimator
+
+- The estimator, though fully nonparametric, is identical to what one would obtain if one knew a priori the true functional form and which predictors were relevant
+
+- In this example we obtain the *oracle* estimator (the oracle knows which predictors are relevant and the nature of the underlying DGP)
+
+# Nonparametric Conditional Volatility Modelling
+
+## Conditional Variance Function Estimation
+
+- A conditional moment that is particularly popular in time series settings is the *second conditional moment about the conditional mean* or the *conditional variance* function, often denoted by $\sigma^2(x)$
+
+- By way of illustration, let $(Y_i,X_i)$ be a strictly stationary process having the same marginal distribution as $(Y,X)$, and let $g(x)=\operatorname{E}(Y|X=x)$ and $\sigma^2(x) = \operatorname{Var}(Y|X=x)$, $\sigma^2(x) > 0$, $\varepsilon\sim(0,1)$, with
+\begin{equation*}
+  Y_i = g(X_i) +\sigma(X_i)\varepsilon_i,\quad i=1,\dots,n
+\end{equation*}
+
+- For $Y_i=Y_t$ and $X_i=Y_{t-1}$ this is a nonlinear autoregressive conditional heteroscedastic (ARCH) time series model, and $\sigma^2(x)$ is the so-called *volatility function* [@ENGLE:1982]
+
+## Local Linear Conditional Variance Estimation
+
+- @FAN_YAO:1998 consider a two-stage approach towards estimation of $\sigma^2(x)$
+
+- Their first stage uses local linear regression of $Y_i$ on $X_i$ which delivers the local linear (squared) residuals $\hat r_i=(Y_i-\hat g(X_i))^2$
+
+- Bandwidth selection proceeds without modification 
+
+- Their second stage involves local linear regression of the squared residuals on $X_i$ (they consider only $q=1$ continuous predictors)
+
+- Even though $g(x)$ is unknown and must be estimated, the bias for $\hat g(x)$ with $q$ continuous predictors is of order $O(\sum_{s=1}^q \hat h_s^2)$, but its contribution to $\hat\sigma^2(x)$ is only of order $o(\sum_{s=1}^q \hat h_s^2)$
+
+## Conditional Variance Function Estimation
+
+- They demonstrate that 
+\begin{equation*}
+\small
+\sqrt{n\prod\nolimits_{j=1}^qh_j}\left( \hat\sigma^2(x) - \sigma^2(x) - \frac{\kappa_2}{2}\sum_{s=1}^q\frac{\partial^2\,\hat\sigma^2(x)}{\partial x^2}h_s^2\right)\to N(0, \Omega_x)
+\end{equation*}
+
+- Here, $\Omega_x = \kappa^q \sigma^4(x)\gamma^2(x)/f(x)$, where $\gamma^2(x)=\operatorname{E}\left((\epsilon^2-1)^2|X=x\right)$ and $\epsilon=(Y-g(X))/\sigma(X)$
+
+- The bias and variance expressions given in Theorem 1 of @FAN_YAO:1998 are exactly those which arise in the usual nonparametric regression analysis, considering the regression function to be $\sigma^2(x)$
+
+- In the bias of $\hat\sigma^2(x)$, the contribution from the error caused by estimating $g(x)$ is of smaller order than $h^2$, namely the order of the bias of $\hat g(x)$ itself
+
+## Conditional Variance Function Estimation
+
+- We use the optimal bandwidth in $\hat g(x)$ (no undersmoothing is needed)
+
+- For the multivariate mixed-data case this then becomes
+\begin{equation*}
+\small
+\sqrt{n\prod\nolimits_{j=1}^qh_j}\left( \hat\sigma^2(x) - \sigma^2(x)-\frac{\kappa_2}{2}\sum_{s=1}^q\frac{\partial^2\,\hat\sigma^2(x)}{\partial x^2}h_s^2-\sum_{s=1}^r \hat\lambda_s D_{s}(x)\right) \to N(0, \Omega_x)
+\end{equation*}
+
+- Here, $D_{s}(x) = \sum_{ v^d } ( {\bf 1}_s(v^d,x^d) \sigma^2(x^c,v^d) -\sigma^2(x))f(x^c,v^d)$
+
+- The approach of @FAN_YAO:1998 is based on the local linear estimator, hence $\hat\sigma^2(x)$ is not guaranteed to be positive (it would if they used the local constant estimator since those weights are non-negative while the local linear weights can assume negative values)
+
+## Conditional Variance Function Estimation
+
+- To overcome this limitation, @CHEN_CHENG_PENG:2009 propose a local linear variant that a) is guaranteed to be positive and b) may perform better in the presence of heavy tailed distributions
+
+- Rewrite $Y_i=g(X_i)+\sigma(X_i)\varepsilon_i$ as $\log r_i=\operatorname{v}(X_i)+\log(\varepsilon_i^2/d)$, $\varepsilon\sim (0,1)$, where $r_i=(Y_i-g(X_i))^2$, $\operatorname{v}(X_i)=\log(d\sigma^2(x))$ and $d$ satisfies $\operatorname{E}\left(\log(\varepsilon_i^2/d)\right)=0$
+
+- To avoid taking $\log(0)$ @CHEN_CHENG_PENG:2009 nonparametrically regress $\log(\hat r_i+n^{-1})$ on $X_i$, $i=1,\dots,n$; denoting the resulting estimates $\hat v(X_i)$, they estimate $d$ by $\hat d=\left(n^{-1}\sum_{i=1}^n\hat r_i\exp(-\hat   v(X_i))\right)^{-1}$, then compute $\tilde\sigma^2(X_i)=\exp\left(\hat v(X_i)\right)/\hat d$, $i=1,\dots,n$
+
+- Related work includes @YU_JONES:2004 for a local-likelihood approach and @BROWN_LEVINE:2007 and @WANG_BROWN_CAI_LEVINE:2008 for difference-based approaches
+
+## A Simulated Illustration (scrollable) {.smaller}
+
+```{r fanyaosimcode,fig.asp=0.65}
+#| echo: true
+#| eval: false
+## Fan & Yao's (1998) estimator, trim negative values of they occur
+## Chen, Cheng & Peng's (2009) estimator is always positive but my
+## Monte Carlo simulations show it is less efficient for this DGP
+library(np)
+set.seed(42)
+n <- 1000
+x <- sort(runif(n))
+sigma.var <- 0.1*(.Machine$double.eps+2*pi*x)**2
+dgp <- sin(2*pi*x)
+y <- dgp + rnorm(n,sd=sqrt(sigma.var))
+model <- npreg(y~x,regtype="ll")
+r <- residuals(model)**2
+## Fan and Yao's (1998) estimator with trimming if needed
+var.fy <- fitted(npreg(r~x,regtype="ll"))
+var.fy <- ifelse(var.fy<=0,.Machine$double.eps,var.fy)
+## Chen, Cheng and Peng's (2009) estimator
+log.r <- log(r+1/n) ## Avoids log(0)
+V.hat <- fitted(npreg(log.r~x,regtype="ll"))
+d.hat <- 1/mean(r*exp(-V.hat))
+var.ccp <- exp(V.hat)/d.hat
+par(mfrow=c(1,2))
+plot(x,y,cex=.25,col="grey")
+lines(x,dgp,col=1,lty=1,lwd=2)
+lines(x,fitted(model),col=2,lty=2,lwd=2)
+legend("topleft",c("g(x)=sin(2 pi x)", 
+                   "Nonparametric Estimate"),
+       col=1:2,
+       lty=1:2,
+       lwd=c(2,2),
+       bty="n")
+ylim=c(min(r),quantile(r,0.95))
+plot(x,r,ylim=ylim,cex=.25,col="grey")
+lines(x,sigma.var,col=1,lty=1,lwd=2)
+lines(x,var.fy,col=2,lty=2,lwd=2)
+lines(x,var.ccp,col=3,lty=4,lwd=2)
+legend("topleft",c("volatility=(2 pi x)^2/10",
+                   "Fan and Yao (1998)",
+                   "Chen et al. (2009)"),
+       col=1:3,
+       lty=c(1,2,4),
+       lwd=c(2,2,2),
+       bty="n")
+```
+
+## A Simulated Illustration {.smaller}
+
+```{r fanyaosim,fig.asp=0.65}
+#| label: fig-fanyaosim
+#| fig-cap: Fan and Yao's (1998) and Chen et al.'s (2009) conditional variance estimators
+#| echo: false
+par(mfrow=c(1,2))
+## Fan & Yao's (1998) estimator, trim negative values of they occur
+## Chen, Cheng & Peng's (2009) estimator is always positive but my
+## Monte Carlo simulations show it is less efficient for this DGP
+set.seed(42)
+n <- 1000
+x <- sort(runif(n))
+sigma.var <- 0.1*(.Machine$double.eps+2*pi*x)**2
+dgp <- sin(2*pi*x)
+y <- dgp + rnorm(n,sd=sqrt(sigma.var))
+model <- npreg(y~x,regtype="ll")
+r <- residuals(model)**2
+## Fan and Yao's (1998) estimator with trimming if needed
+var.fy <- fitted(npreg(r~x,regtype="ll"))
+var.fy <- ifelse(var.fy<=0,.Machine$double.eps,var.fy)
+## Chen, Cheng and Peng's (2009) estimator
+log.r <- log(r+1/n) ## Avoids log(0)
+V.hat <- fitted(npreg(log.r~x,regtype="ll"))
+d.hat <- 1/mean(r*exp(-V.hat))
+var.ccp <- exp(V.hat)/d.hat
+plot(x,y,cex=.25,col="grey")
+lines(x,dgp,col=1,lty=1,lwd=2)
+lines(x,fitted(model),col=2,lty=2,lwd=2)
+legend("topleft",c("g(x)=sin(2 pi x)", 
+                   "Nonparametric Estimate"),
+       col=1:2,
+       lty=1:2,
+       lwd=c(2,2),
+       bty="n")
+ylim=c(min(r),quantile(r,0.95))
+plot(x,r,ylim=ylim,cex=.25,col="grey")
+lines(x,sigma.var,col=1,lty=1,lwd=2)
+lines(x,var.fy,col=2,lty=2,lwd=2)
+lines(x,var.ccp,col=3,lty=4,lwd=2)
+legend("topleft",c("volatility=(2 pi x)^2/10",
+                   "Fan and Yao (1998)",
+                   "Chen et al. (2009)"),
+       col=1:3,
+       lty=c(1,2,4),
+       lwd=c(2,2,2),
+       bty="n")
+```
+
+# Nonparametric Panel Data Modelling
+
+::: {.notes}
+
+Random effects models are often attacked via GLS estimation, fixed effects by modelling the effects additively or fully nonparametrically
+
+:::
+
+# Random Effects One-way Error Component Model
+
+## Random Effects Models
+
+- Consider a nonparametric one-way error component model,
+\begin{equation}\label{eqref:error_component_model}
+Y_{it}=g(X_{it}) +\varepsilon_{it},
+\end{equation}
+where $i=1,\ldots ,n$, $t=1,\ldots ,T$, $Y_{it}$ is the endogenous variable,
+$X_{it}=\left( X_{it1},\ldots ,X_{itq}\right)^{\mathrm{T}}$ is a vector of $q$ exogenous variables, and
+$g(\cdot)$ is an unknown smooth function
+
+- Let $\varepsilon_{it}$ have a random effects specification,
+i.e.,
+\begin{equation*}
+\varepsilon_{it}=u_{i}+v_{it},
+\end{equation*}
+where $u_{i}$ is i.i.d.\ $\left( 0,\sigma_{u}^{2}\right)$, $v_{it}$ is i.i.d. $\left( 0,\sigma_{v}^{2}\right)$, and $u_{i}$ and $v_{it}$ are uncorrelated for all $i$ and $t$
+
+- Let
+$\varepsilon_{i}=\left( \varepsilon_{i1},\ldots,\varepsilon_{iT}\right) ^{\mathrm{T}}$ be a $T\times 1$ vector
+
+## Random Effects Models
+
+- Then $\Sigma\equiv E\left(\varepsilon_{i}\varepsilon_{i}^{\mathrm{T}}\right)$ takes the form
+\begin{equation*}
+\Sigma=\sigma_{v}^{2}I_{T}+\sigma_{u}^{2}1_{T}1_{T}^{\mathrm{T
+}},
+\end{equation*}
+where $I_{T}$ is an identity matrix of dimension $T$ and $1_{T}$ is a $T\times 1$ column vector of ones
+
+- The covariance matrix for
+$\varepsilon =\left(\varepsilon_{1}^{\mathrm{T}},\ldots
+,\varepsilon_{n}^{\mathrm{T}}\right) ^{\mathrm{T}}$ is
+\begin{align*}
+\Omega&=E\left(\varepsilon \varepsilon^{\mathrm{T}}\right)=I_{N}\otimes \Sigma,\text{ and }
+\Omega^{-1}=I_{N}\otimes \Sigma^{-1}
+\end{align*}
+
+- By simple linear algebra,
+$\Sigma^{-1}=\left( \Sigma_{tt^{\prime }}\right)_{t,t^{\prime
+}=1}^{T}=\Sigma_{1}I_{T}+\Sigma_{2}1_{T}1_{T}^{\mathrm{T}}$
+with $\Sigma_{1}=\sigma_{v}^{-2}$ and
+$\Sigma_{2}=-\left( \sigma_{v}^{2}+\sigma_{u}^{2}T\right)
+^{-1}\sigma_{u}^{2}\sigma_{v}^{-2}$
+
+- Let $A=\Omega^{-1/2}$ be the square root of $\Omega^{-1}$ such that $AA^{\mathrm{T}}=\Omega^{-1}$ (use e.g.\ Cholesky decomposition, $A$ is a lower triangular matrix)
+
+## Random Effects Models
+
+- Transform $Y_{it}$ so that the errors are i.i.d., i.e.,
+\begin{align*}
+Y_{it}^*&=\tau\Omega^{-1/2}Y_{it}+(I-\tau\Omega^{-1/2})g(X_{it})\cr
+&=g(X_{it})+\tau\Omega^{-1/2}\varepsilon_{it}
+\end{align*}
+
+- This is obtained by adding and subtracting $\tau\Omega^{-1/2}Y_{it}$ from the right hand side of
+\eqref{eqref:error_component_model}, moving $-\tau\Omega^{-1/2}Y_{it}+\varepsilon_{it}$ to the left hand side,
+then replacing $\varepsilon_{it}$ by $Y_{it}-g(X_{it})$ and simplifying
+
+- The two-step estimator [@SU_ULLAH:2007] involves a first-step pooled nonparametric estimator of Equation \eqref{eqref:error_component_model}, then the first-step pooled residuals are used to estimate $\Omega^{-1/2}$, $g(X_{it})$, and $\tau$, finally $\hat Y_{it}^*$ is nonparametrically regressed on $X_{it}$, as follows
+
+- Let $Y_{i}=(Y_{i1},\dots,Y_{iT})$, $\bar\varepsilon_{i}=T^{-1}\sum_{t=1}^T \hat\varepsilon_{it}$, and
+$\hat\varepsilon_{it}=Y_{it}-\hat g(X_{it})$ where $\hat g(X_{it})$ is the first-step pooled kernel estimator of $g(X_{it})$
+
+## Random Effects Models
+
+- Let
+  \begin{align*}
+  \hat\sigma^2_1&=(T/n)\sum_{i=1}^n \bar\varepsilon_{i},\quad
+  \sigma^2_v=(n(T-1))^{-1}\sum_{i=1}^n\sum_{t=1}^T(\hat\varepsilon_{it}-\bar\varepsilon_{i})^2,\quad\text{and} \cr
+  \hat\sigma^2_u&=T^{-1}(\hat\sigma^2_1-\hat\sigma^2_v)
+  \end{align*}
+
+- The estimator of the $T\times T$ matrix $\Sigma$ is
+obtained via
+  \begin{equation*}
+  \small
+  \widehat{\Sigma}=
+  \begin{pmatrix}
+  \hat\sigma^2_u+\hat\sigma^2_v&\hat\sigma^2_u&\hat\sigma^2_u&\dots
+  &\hat\sigma^2_u\cr
+  \hat\sigma^2_u&\hat\sigma^2_u+\hat\sigma^2_v&\hat\sigma^2_u&\dots
+  &\hat\sigma^2_u\cr
+  \vdots&\hat\sigma^2_u&\hat\sigma^2_u&\vdots& \hat\sigma^2_u\cr
+  \hat\sigma^2_u&\hat\sigma^2_u&\hat\sigma^2_u&\dots&
+  \hat\sigma^2_u+\hat\sigma^2_v
+  \end{pmatrix}
+  \end{equation*}
+
+## Random Effects Models
+
+- $\widehat{\Sigma}$ can be written as
+\begin{equation*}
+\widehat{\Sigma}=
+(\hat\sigma^2_u+\hat\sigma^2_v)
+\begin{pmatrix}
+1&c&c&\dots &c\cr c&1&c&\dots &c\cr \vdots&c&c&\vdots& c\cr
+c&c&c&\dots& 1
+\end{pmatrix},
+\end{equation*}
+where $c=\hat\sigma^2_u/(\hat\sigma^2_u+\hat\sigma^2_v)$,
+$0\le c<1$
+
+- Racine \& Ullah (2015) suggest choosing $\tau$ via $\hat\tau=(1.5-c)\sqrt{\hat\sigma^2_u+\sigma^2_v}$; see also
+@MARTINS_FILHO_YAO:2009 who suggest $\tau=\sigma_v/[1-\{1-\sqrt{1-d_T}\}/T]$ where $d_T=T\sigma^2_u/(\sigma^2_v+T\sigma^2_u)$, and @RUCKSTUHL_WELSH_CARROLL:2000 who suggest $\tau=\sigma_\varepsilon=\sqrt{\sigma^2_u+\sigma^2_v}$
+
+
+## Random Effects Models
+
+- The feasible transformed dependent variable is therefore 
+\begin{equation*}
+\hat Y_{it}^*=\hat g(X_{it})+(1.5-c)\sqrt{\hat\sigma^2_u+\sigma^2_v}\widehat\Omega^{-1/2}\hat\varepsilon_{it}
+\end{equation*}
+
+- The second-step random effects estimator is obtained by the nonparametric regression of $\hat Y_{it}^*$ on $X_{it}$, where $\hat Y_{it}^*$ is obtained by replacing $\widehat{\Sigma}$, $g(X_{it})$, and $\tau$ with their first step estimates outlined above
+
+- For asymptotic results the bias in the first-step must be lower than in the second-step which is readily achieved by using a higher order kernel in the first-step than the second; see @MARTINS_FILHO_YAO:2009
+
+- Cross-validation can be used to obtain the optimal bandwidths in each step
+
+## Random Effects Models {.smaller}
+
+```{r reecm}
+#| echo: true
+#| eval: false
+## Below is pseudo-code for generic data y, x (univariate) and 
+## panel id (univariate) - we shall modify and use this for real
+## data but it demonstrates all the nuances of the approach
+library(np)
+## Compute the pooled first-step estimator
+model.pooled <- npreg(y~x,ckerorder=4)
+## Compute Sigma.inv
+epsilon <- residuals(model.pooled)
+epsiloni.bar <- numeric()
+i <- sigmasq.v <- 0
+for(id in unique(id)) {
+  i <- i+1
+  epsiloni.bar[i] <- mean(epsilon[id==id])
+  sigmasq.v <- sigmasq.v + sum((epsilon[id==id]-epsiloni.bar[i])**2)
+}
+sigmasq.one <- (T/n)*sum(epsiloni.bar**2)
+sigmasq.v <- sigmasq.v/(n*(T-1))
+sigmasq.u <- (sigmasq.one-sigmasq.v)/T
+Sigma.inv <- (1/sigmasq.v)*diag(T) -
+  (sigmasq.u/sigmasq.v)/(sigmasq.v+sigmasq.u*T)*matrix(1,T,T)
+## Compute Omega.inv.sqrt via Cholesky decomposition
+Omega.inv.sqrt <- chol(kronecker(diag(n),Sigma.inv))
+## Compute c (for computing tau)
+c <- sigmasq.u/(sigmasq.u+sigmasq.v)
+## Compute y-star
+y.star <- fitted(model.pooled) + 
+  (1.5-c)*sqrt(sigmasq.u+sigmasq.v)*Omega.inv.sqrt%*%residuals(model.pooled)
+## Compute the second-step estimator
+model.re <- npreg(y.star~x,ckerorder=2)
+```   
+
+# Fixed Effects Models
+
+## Fixed Effects One-way Error Component Model
+
+- Nonparametric fixed effects models can be obtained by treating the cross-section identifier as an unordered factor
+
+  ```{r feecm}
+  #| echo: true
+  #| eval: false
+  library(np)
+  model.fe <- npreg(y~x+factor(id))
+  ```   
+- One benefit of this approach is the ability of the model to automatically pool or partially pool the model, if appropriate
+
+- Nonparametric models with additive fixed effects (i.e., semiparametric) models have been considered by
+@HENDERSON_CARROLL_LI:2008 and @LEE_ROBINSON:2015
+
+## Airline Panel Illustration (Scrollable) {.smaller}
+
+Consider the Airline panel dataset from the Ecdat package, construct nonparametric fixed and random effects models (the example below is scrollable, cut-and-paste and execute)
+
+```{r airline}
+#| echo: true
+#| eval: false
+library(Ecdat)
+data(Airline)
+?Airline
+library(np)
+options(np.messages=FALSE)
+attach(Airline)
+
+## Dependent variable is (log) cost, predictors (log) output, fuel price, load factor, year
+lcost <- as.numeric(log(cost))
+loutput <- as.numeric(log(output))
+lpf <- as.numeric(log(pf))
+lf <- as.numeric(lf)
+year <- ordered(year)
+airline <- factor(airline)
+
+## Airline specific fixed effects
+
+model.fe <- npreg(lcost~loutput+lpf+lf+year+airline,
+                  regtype="ll",
+                  bwmethod="cv.aic",
+                  ukertype="liracine",
+                  okertype="liracine",
+                  gradients=TRUE)
+
+summary(model.fe)
+summary(model.fe)
+## Plot partial means
+plot(model.fe,
+     plot.errors.method="bootstrap",
+     plot.errors.boot.num=25,
+     common.scale=FALSE)
+## Plot partial gradients
+plot(model.fe,
+     plot.errors.method="bootstrap",
+     plot.errors.boot.num=25,
+     gradients=TRUE,
+     common.scale=FALSE)
+
+## Random effects
+
+## Compute the pooled first-step estimator
+
+id <- airline
+n <- length(unique(airline))
+T <- length(unique(year))
+model.pooled <- npreg(lcost~loutput+lpf+lf+year,
+                      ckerorder=4,
+                      regtype="ll",
+                      bwmethod="cv.aic",
+                      ukertype="liracine",
+                      okertype="liracine")
+## Compute Sigma.inv
+epsilon <- residuals(model.pooled)
+epsiloni.bar <- numeric()
+i <- sigmasq.v <- 0
+for(id in unique(id)) {
+  i <- i+1
+  epsiloni.bar[i] <- mean(epsilon[id==id])
+  sigmasq.v <- sigmasq.v + sum((epsilon[id==id]-epsiloni.bar[i])**2)
+}
+sigmasq.one <- (T/n)*sum(epsiloni.bar**2)
+sigmasq.v <- sigmasq.v/(n*(T-1))
+sigmasq.u <- (sigmasq.one-sigmasq.v)/T
+Sigma.inv <- (1/sigmasq.v)*diag(T) -
+  (sigmasq.u/sigmasq.v)/(sigmasq.v+sigmasq.u*T)*matrix(1,T,T)
+## Compute Omega.inv.sqrt via Cholesky decomposition
+Omega.inv.sqrt <- chol(kronecker(diag(n),Sigma.inv))
+## Compute c (for computing tau)
+c <- sigmasq.u/(sigmasq.u+sigmasq.v)
+## Compute y-star
+y.star <- fitted(model.pooled) + 
+  (1.5-c)*sqrt(sigmasq.u+sigmasq.v)*Omega.inv.sqrt%*%residuals(model.pooled)
+## Compute the second-step estimator
+model.re <- npreg(y.star~loutput+lpf+lf+year,
+                  ckerorder=2,
+                  regtype="ll",
+                  bwmethod="cv.aic",
+                  ukertype="liracine",
+                  okertype="liracine")
+
+summary(model.re)
+## Plot partial means
+plot(model.re,
+     plot.errors.method="bootstrap",
+     plot.errors.boot.num=25,
+     common.scale=FALSE)
+## Plot partial gradients
+plot(model.re,
+     plot.errors.method="bootstrap",
+     plot.errors.boot.num=25,
+     gradients=TRUE,
+     common.scale=FALSE)
+```

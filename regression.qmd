@@ -1,0 +1,421 @@
+# Nonparametric Regression
+
+## Nonparametric Regression
+
+- The conditional mean function $g(x):=\mathbb{E}(Y\vert X=x)$ for numeric $Y\in\mathbb{R}$ is *defined* as
+  \begin{equation}
+  \label{g(x)}
+  g(x)=\int y\frac{f(y,x)}{f(x)}\,dy=\frac{m(x)}{f(x)}
+  \end{equation}
+  
+- Let's start with $X\in\mathbb{R}^1$ (i.e., one numeric predictor)
+  
+- We aim to estimate the unknown regression model $y=g(x)+\varepsilon$ without assuming that, e.g., $g(x)=\beta_0+\beta_1x$
+
+::: { .notes }
+
+- After "We aim", mention the following:
+
+- People often use the same simple model for different datasets
+
+- Is it realistic to assume $\int y\frac{f(y,x)}{f(x)}\,dy=\beta_0+\beta_1x$ for *every* dataset?
+
+- Think of just the denominator, $f(x)$ - the *same* for all data?
+
+:::
+  
+## Nonparametric Regression
+
+- Regression is a *hard* problem because $f(y,x)$ and $f(x)$ are unknown
+
+- They can be *consistently* estimated using $\hat f(y,x)$ and $\hat f(x)$
+
+- For continuously distributed $Y\in\mathbb{R}$, the *local constant* kernel regression estimator replaces the *unknown* $f(y,x)$ and $f(x)$ with $known$ $\hat f(y,x)$ and $\hat f(x)$ in \eqref{g(x)}, hence
+  \begin{equation}
+  \hat g(x)=\int y \frac{\hat f(y,x)}{\hat f(x)}\,dy=\frac{\hat m(x)}{\hat f(x)}
+  \end{equation}
+  
+## Nonparametric Regression
+
+- For $Y\in\mathbb{R}$ and $X\in\mathbb{R}^1$ (i.e., $q=1$), we estimate $g(x)$ by 
+
+    1. replacing the unknown $f(x)$ in \eqref{g(x)} with
+\begin{equation*}
+  \hat f(x)=\frac{1}{nh}\sum_{i=1}^n K\left(\frac{x-X_i}{h}\right)
+  \end{equation*}
+  
+    1. replacing the unknown $f(y,x)$ in \eqref{g(x)} with
+\begin{equation*}
+  \hat f(y,x)=\frac{1}{nh_yh}\sum_{i=1}^n K\left(\frac{y-Y_i}{h_y}\right)K\left(\frac{x-X_i}{h}\right)
+  \end{equation*}
+  
+## Nonparametric Regression
+
+-  Some mathematical simplification of $\hat g(x)$ then leads to
+  \begin{equation*}
+  \hat g(x)=\sum_{i=1}^n Y_i\left\{\frac{K\left(\frac{X_i-x}{h}\right)}{\sum_{i=1}^n K\left(\frac{X_i-x}{h}\right)}\right\}=\sum_{i=1}^n Y_i W_i(x)
+  \end{equation*}
+  
+- With mixed data multivariate $X$ (i.e., $x$ and $X_i$ are $q+r+s$-vectors)
+we replace $K((x-X_i)/h)$ with $K_\gamma(X_i,x)$ defined previously (we will return to this case shortly)
+
+- The estimated nonparametric regression function is
+  \begin{equation}\label{eq:ghat}
+  y=\hat g(x)+\hat\epsilon
+  \end{equation}
+  
+::: { .notes }
+
+- Point out that $\sum_{i=1}^n Y_i W_i(x)$ is simply a *weighted average* of $Y_i$ where the weights are *local* (i.e., local to $x$)
+
+- So the weights change with $x$
+
+:::
+
+## Nonparametric Regression
+
+- The pointwise bias (univariate $X$) is given by
+    \begin{equation*}
+      \operatorname{bias}\hat g(x)\approx \frac{h^2}{2f(x)}\left\{2g'(x)f'(x)+g^{''}(x)f(x)\right\}\kappa_2
+    \end{equation*}
+
+- The pointwise variance (univariate $X$) is given by
+    \begin{equation*}
+      \operatorname{var}\hat g(x)
+      \approx\frac{\sigma^2(x)}{nhf(x)}\kappa
+    \end{equation*}
+
+- The bias once again falls as $h$ decreases, while variance again rises as $h$ decreases
+
+## Nonparametric Regression
+
+- How one selects the bandwidth $h$ is a key aspect to sound nonparametric analysis, and cross-validation methods are powerful data-driven solutions
+
+- See `bwmethod="cv.ls"` in the functions `npreg()` and `npregbw()`
+
+- Least-squares cross-validation chooses $h$ to minimize the following objective function
+  \begin{equation*}
+    CV_{lc}(h) = n^{-1}\sum_{i=1}^n \left(Y_i - \hat g_{-i}(X_i)\right)^2
+    M(X_i),
+  \end{equation*}
+  where $\hat g_{-i}(X_i) =\sum_{l\neq i}^n Y_l K_\gamma(X_i,x)/\sum_{l\neq i}^n K_\gamma(X_i,x)$ is the leave-one-out kernel estimator of $g(X_i)$, and $0\leq M(\cdot)\leq 1$ is a weight function which serves to avoid difficulties caused by dividing by zero, or by the slow convergence rate caused by boundary effects
+  
+## Nonparametric Regression
+
+- Generalized cross-validation was proposed by @CRAVEN_WAHBA:1979
+
+- The kernel estimator can be expressed as
+  \begin{equation*}
+    (\hat g(X_1),\dots,\hat g(X_n))'=H(h)Y,
+  \end{equation*} where $H(h)$ is an $n\times n$ hat matrix which depends on the
+  $X$s, $h$, and $K(\cdot)$, and $Y=(Y_1,\dots,Y_n)'$
+
+- The GCV approach selects $h$ that minimizes
+  \begin{equation*}
+    GCV(h)=[n^{-1}{\rm tr}\{I-H(h)\}]^{-2}n^{-1}\sum_{i=1}^n\left(Y_i-\hat g(X_i)\right)^2
+  \end{equation*}
+
+- Both $CV(h)$ and $GCV(h)$ are consistent estimates of the MISE of $\hat g(x)$
+
+## Nonparametric Regression
+
+- @HURVICH_SIMONOFF_TSAI:1998 proposed an improved information criterion based on minimization of
+  \begin{equation*}
+    AIC_c(h)=\log\left[n^{-1}\sum_{i=1}^n\left(Y_i-\hat
+        g(X_i)\right)^2\right]
+    +1+\left[\frac{2\left({\rm tr}H(h)+1\right)}
+      {n-{\rm tr}H(h)-2}
+    \right]
+  \end{equation*}
+
+- See `bwmethod="cv.aic"` in the functions `npreg()` and `npregbw()`
+
+- To assess how various bandwidth selection methods perform on actual data, we consider the following example using data from @FOX:2011 `car` package and the local linear estimator
+
+- The dataset consists of $n=102$ observations. The dependent variable is the prestige of Canadian occupations (`Pineo-Porter score') and the explanatory variable is average income for each occupation measured in 1971 Canadian dollars
+
+## Nonparametric Regression
+
+```{r prestige}
+rm(list=ls())
+library(np)
+library(car)
+Prestige <- Prestige[order(Prestige$income),]
+attach(Prestige)
+## Plug-in
+library(KernSmooth)
+h <- dpill(income, prestige)
+model.plugin <- locpoly(income, prestige, bandwidth = h)
+## Under
+bw <- npregbw(prestige~income,bws=c(sd(income)*length(income)^{-1/5}/10),regtype="ll",bandwidth.compute=FALSE)
+fit.under <- fitted(npreg(bws=bw))
+## Over
+bw <- npregbw(prestige~income,bws=c(1000*sd(income)*length(income)^{-1/5}),regtype="ll",bandwidth.compute=FALSE)
+fit.over <- fitted(npreg(bws=bw))
+## LL CV
+bw <- npregbw(prestige~income,bwmethod="cv.ls",regtype="ll")
+fit.ls <- fitted(npreg(bws=bw))
+## LL CV
+bw <- npregbw(prestige~income,bwmethod="cv.aic",regtype="ll")
+fit.aic <- fitted(npreg(bws=bw))
+par(mfrow=c(2,2))
+plot(income,prestige,xlab="Income (K)", ylab="Prestige",main="Undersmoothed")
+lines(income,fit.under)
+plot(income,prestige,xlab="Income (K)", ylab="Prestige",main="Oversmoothed")
+lines(income,fit.over)
+plot(income,prestige,xlab="Income (K)", ylab="Prestige",main="Plug-In")
+lines(model.plugin$x,model.plugin$y)
+plot(income,prestige,xlab="Income (K)", ylab="Prestige",main="AICc & CV-LS")
+lines(income,fit.ls,lty=1)
+lines(income,fit.aic,lty=2)
+```
+    
+## Nonparametric Regression
+
+- As noted previously, the multivariate mixed-data kernel regression estimator is obtained by simply replacing the univariate continuous kernel function in \eqref{eq:ghat} (i.e., $K((X_i-x)/h)$) with its multivariate mixed-data counterpart (i.e., $K_\gamma(X_i,x)$) 
+
+- This estimator is known as the "local constant" estimator because it can also be obtained by minimizing
+
+    \begin{equation*}
+    \mathcal{S}=\sum_{i=1}^n(Y_t-\alpha)^2K_\gamma(X_i,x)
+    \end{equation*}
+
+    with respect to the *local constant* $\alpha$
+
+- For technical details (bias, variance etc.) see @racine_2019
+
+## Nonparametric Regression
+
+- A popular alternative of the local constant estimator is obtained by replacing the *constant* $\alpha$ in $\mathcal{S}$ by a linear regression function $\alpha+\beta X$ (this is called "local linear" regression - we simply call `npreg()` with the option `regtype="ll"`)
+
+- The popularity of this method arises from the fact that it has lower "boundary bias" than the local constant counterpart
+
+- However, it lacks one important feature of the local constant estimator, namely the ability to automatically remove irrelevant predictors without the need for pre-testing
+
+- A generalization can be found in the function `npglpreg()` in the R package `crs` that overcomes this limitation
+
+- See @racine_2019 for further details
+  
+## Simulated Data Illustration
+
+```{r npregcos}
+#| echo: true
+library(np)
+set.seed(42)
+n <- 1000
+x <- sort(runif(n))
+dgp <- cos(2*pi*x)
+y <- dgp + rnorm(n,sd=0.25*sd(dgp))
+ghat <- npreg(y~x)
+plot(x,y,cex=0.5,col="grey",xlab="X",ylab="Y")
+lines(x,dgp)
+lines(x,fitted(ghat),col=2)
+abline(ghat.ols <- lm(y~x),col=3)
+legend("top",c("DGP","Kernel","OLS"),col=1:3,lty=1,bty="n")
+```
+
+## Simulated Data Illustration: OLS {.smaller}
+
+How does the simple parametric linear model `ghat.ols` do for this simulated data?
+
+```{r cosolssummary}
+pander::pander(summary(ghat.ols))
+```
+
+::: callout-warning
+Oh oh... this linear parametric model truly sucks... the nonparametric model has an $R^2$ of `r pander::pander(ghat$R2)` (the parametric  model has an $R^2$ of `r pander::pander(summary(ghat.ols)$r.squared)` and a *negative* adjusted $R^2$)
+:::
+
+## Marginal Effects
+
+- The univariate $X$ *marginal effects function* is simply the first partial derivative function, and is defined as
+  \begin{align}
+  \beta(x)=\frac{d g(x)}{dx}
+  &=\frac{f(x)m'(x)- m(x)f'(x)}{f^2(x)}\notag\\
+  &=\frac{m'(x)}{f(x)}-g(x)\frac{f'(x)}{f(x)}
+  \label{beta(x)}
+  \end{align}
+  
+- We construct $\hat\beta(x)$ by replacing $f(x)$, $m'(x)$, $m(x)$, and $f'(x)$ in \eqref{beta(x)} with $\hat f(x)$, $\hat m'(x)$, $\hat m(x)$, and $\hat f'(x)$ 
+
+## Marginal Effects
+
+- The pointwise approximate bias (univariate $X$),
+    $\operatorname{bias}(\hat\beta(x))$, is
+    \begin{equation*}\small
+      \frac{h^2\kappa_2}{2}\left\{ g^{'''}(x) +2
+        \left\{\frac{g'(x)f^{''}(x)}{f(x)}
+          +\frac{g^{''}(x)f'(x)}{f(x)}
+          -g'(x)\left(\frac{f'(x)}{f(x)}\right)^2 \right\}
+      \right\}
+    \end{equation*}
+
+- The pointwise approximate variance (univariate $X$) is
+    \begin{equation*}
+      \operatorname{var}\hat\beta(x)=\frac{\sigma^2(x)}{nh^3f(x)}\int K^{'2}(z)\,dz
+    \end{equation*}
+    
+- We can use the asymptotic variance to construct pointwise confidence intervals replacing $\sigma^2(x)$ and $f(x)$ with their kernel estimates    
+  
+## Marginal Effects
+
+- Recall the definitions of the conditional mean and marginal effects functions,  $g(x)$ and $\beta(x)$
+
+- They involve unknown joint and marginal densities and their derivatives, which are functions of $x$ and $y$
+
+- If you were tasked with estimating $\beta(x)$, it is hard to justify the assumption that $\beta(x)$ is *constant* (i.e., some constant $\beta$ that is *not* a function of $x$ like $\beta(x)$)
+
+- But this is *exactly* what is assumed for the popular linear regression model (i.e., $\beta(x)=d y/d x=\beta_1$, a *constant*)
+
+- Consider the following example that compares simple linear regression (`lm(y~x)`) with its kernel counterpart (`npreg(y~x)`)
+
+## Example - Simulated Marginal Effects
+
+```{r cosgradient}
+#| echo: true
+plot(ghat,gradients=TRUE,neval=250)
+lines(x,-2*pi*sin(2*pi*x),col=2)
+abline(h=coef(ghat.ols)[2],col=3)
+legend("topleft",c("Kernel ME","DGP ME","Linear ME"),col=1:3,lty=1,bty="n")
+```
+
+## Mixed Data Marginal Effects
+
+- Consider a multivariate conditional mean function $g(x)$ where $x$ is composed of $q$ continuous, $r$ unordered, and $s$ ordered predictors
+
+- As in the previous univariate example, if the $j$th predictor is continuous, i.e., $x_{j}\in\mathbb{R}$, then $\hat\beta_j(x)$ is the first partial derivative function of $\hat g(x)$ with respect to the $j$th predictor, i.e.,
+\begin{equation*}
+\hat\beta_j(x) = \frac{\partial\hat g(x)}{\partial x_j} = \frac{\hat m^{(j)}(x)}{\hat f(x)}-\hat g(x)\frac{\hat f^{(j)}(x)}{\hat f(x)}
+\end{equation*}
+
+- See @racine_2019 for technical details
+
+## Multivariate Mixed-Data Marginal Effects
+
+- If the  $j$th predictor is unordered in $\mathcal{D}=\{a,b,c\}$, then $\hat\beta_j(x)$ is the difference between $\hat g(x)$ when $x^u_j=b$ versus $\hat g(x)$ when $x^u_j=a$, and between  $\hat g(x)$ evaluated at $x^u_j=c$ versus at $x^u_j=a$ ($a$ is the *base* category)
+\begin{equation*}
+\hat\beta_j(x)=\hat g(x_{(-j)},x_{j}=l) - \hat g(x_{(-j)},x_{j}=a),\, l=b,c
+\end{equation*}
+
+- If the $j$th predictor is ordered we have two options, namely, to take differences as in the unordered case, or to take differences between *successive* elements of the ordered set (i.e., between $a$ and $b$ then between $b$ and $c$)
+
+- See @racine_2019 for technical details
+
+## Multivariate Regression 
+
+- We use Wooldridge's `wage1` data containing numeric and categorical predictors
+
+- We regress `lwage` on categorical predictors `female` and `married` and numeric predictors `educ`, `exper` and `tenure`
+
+- The formula for the regression models is
+
+  `lwage~female+married+educ+exper+tenure`
+  
+- For the nonparametric model this just lists the predictors
+
+- For the parametric model it imposes linear structure
+
+## Multivariate Nonparametric Regression {.smaller}
+
+```{r wage1summary}
+#| echo: true
+library(np)
+data(wage1)
+?wage1
+ghat <- npreg(lwage ~ female + married + educ + exper + tenure, data=wage1, regtype="ll")
+summary(ghat)
+```
+
+## Partial Regression Plots {.smaller}
+
+```{r wage1plot}
+#| echo: true
+## We run out of graph axis dimensions with > 2 predictors, so it is common to
+## construct partial plots that plot the fitted model versus each predictor
+## separately holding the off-axis predictors at, say, their median value (you
+## can change this - see ?npplot and the argument xq)
+par(mfrow=c(2,3))
+plot(ghat,plot.errors.method="bootstrap")
+```
+
+## Marginal Effects (Gradient) Plots {.smaller}
+
+```{r wage1gradientplot}
+#| echo: true
+par(mfrow=c(2,3))
+plot(ghat,gradients=TRUE,plot.errors.method="bootstrap")
+```
+
+## Testing $H_0\colon\beta_j=0$ (OLS Significance) {.smaller}
+
+A simple $t$-test is used to test $H_0\colon \beta_j=0$
+
+```{r wage1sigtestols}
+#| echo: true
+ghat.ols <- lm(lwage ~ female + married + educ + exper + tenure, data=wage1)
+summary(ghat.ols)
+```
+
+## Testing $H_0\colon\beta_j(x)=0$ (Significance)
+
+- The null and alternative hypotheses are
+\begin{align*}
+  H_0\colon\quad& \beta_j(x) = 0\hbox{ for all } x \hbox{ (a.e.)}\\
+  H_A\colon\quad& \beta_j(x) \ne 0 \hbox{ for some }x\hbox{ on a set
+  with + measure}
+\end{align*}
+
+- A feasible test statistic $\hat\lambda\ge 0$ is given by
+\begin{equation*}
+  \hat\lambda=\left\{
+    \begin{array}{ll}
+       n^{-1}\sum_{i=1}^n \hat\beta_j(X_i)^2&\text{ if }x_j\in\mathbb{R}\\
+       n^{-1}\sum_{i=1}^n \sum_{l=1}^{c-1}\hat\beta_j(X_i)^2 & \text{ if }x_j\in\mathcal{D}
+     \end{array}
+   \right.
+\end{equation*}
+
+- A bootstrap procedure provides the null distribution (@RACINE:1997, @RACINE_HART_LI:2006)
+
+## Testing $H_0\colon\beta_j(x)=0$ (Significance) {.smaller}
+
+A bootstrap $\lambda$-test is used to test $H_0\colon \beta_j(x)=0\,\forall\, x$ (a.e.)
+
+```{r wage1sigtestnp}
+#| echo: true
+npsigtest(ghat)
+```
+
+## Counterfactuals
+
+- The R function `fitted(...)` extracts fitted values for each sample observation
+
+- Suppose we want fitted values for *specific value(s)* of the predictor(s)
+
+- We use the R function `predict(...,newdata=...)` where `newdata` points to a data frame containing *named and cast* $X$ values for which we want predictions
+
+- Let's generate a data frame called `df` containing 1 row to generate the predicted log-wage for single males having median education, job tenure and job experience
+
+## Counterfactuals
+
+```{r wage1preddf}
+#| echo: true
+attach(wage1)
+df <- data.frame(female = factor("Male", levels=levels(female)),
+                 married = factor("Notmarried", levels=levels(married)),
+                 educ = median(educ),
+                 tenure = median(tenure),
+                 exper = median(exper))
+head(df)
+predict(ghat, newdata=df)
+## Or you could use ghat <- npreg(...,newdata=df) and fitted(ghat) 
+## ghat <- npreg(lwage ~ female + married + educ + exper + tenure, 
+##               data=wage1,
+##               regtype="ll", 
+##               newdata=df)
+## fitted(ghat)
+## Note - If `df` had multiple rows we would get a prediction for each
+## row (i.e., a vector of predictions)
+```
+  
+

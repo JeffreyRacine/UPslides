@@ -1,0 +1,442 @@
+# Semiparametric Models
+
+## Overview of Semiparametric Modelling
+
+- Semiparametric models are a compromise between fully nonparametric and fully parametric specifications
+
+- They are used to reduce the dimension of the nonparametric component in order to mitigate the curse of dimensionality
+
+- They have proven to be quite popular in applied settings and tend to be simpler to interpret than fully nonparametric models
+
+- However, they rely on parametric assumptions and can therefore be misspecified and inconsistent, just like their parametric counterparts
+
+- We shall restrict attention to regression-type models, and we consider three popular methods, namely, the partially linear, single index, and varying coefficient specifications
+
+## Robinson's Partially Linear Model
+
+- The partially linear model [@ROBINSON:1988] is one of the simplest semiparametric models used in practice
+
+- A semiparametric partially linear model is given by
+  \begin{equation*}
+    Y_i = X_i'\beta + g(Z_i) + u_i, \quad i=1,\dots ,n
+  \end{equation*}
+
+- $X_i$ is a $p\times 1$ vector of regressors, $\beta$ is a $p\times 1$ vector of unknown parameters
+
+- $Z_i\in \mathbb{R}^q$
+
+- The functional form of $g(\cdot)$ is not specified
+
+- The finite dimensional parameter $\beta$ constitutes the parametric part of the model and the unknown function $g(\cdot)$ the nonparametric part
+
+## Robinson's Partially Linear Model
+
+- The goal is to consistently estimate $\beta$
+
+- Identification conditions are required in order to identify the parameter vector $\beta$
+
+- In particular, $X$ cannot contain a constant (i.e.\ $\beta$ cannot contain an intercept) because, if there were an intercept, say $\alpha$, it could not be identified separately from the unknown function $g(\cdot)$
+
+- To see this note that, for any constant $c\neq 0$,
+\begin{equation*}
+\alpha + g(z) = [\alpha + c] + [g(z) - c] \equiv \alpha_\text{new} + g_\text{new}(z),
+\end{equation*}
+thus the sum of the new intercept and the new $g(\cdot)$ function is
+observationally equivalent to the sum of the old ones
+
+- Since the functional form of $g(\cdot)$ is not specified, this immediately tells us that an intercept term cannot be identified in a partially linear model
+
+## Robinson's Partially Linear Model
+
+- Robinson's insight is to first eliminate the unknown function $g(\cdot)$
+
+- Taking expectations conditional on $Z_i$, we get
+  \begin{equation*}
+    \operatorname{E}(Y_i|Z_i) = \operatorname{E}(X_i|Z_i)'\beta + g(Z_i)
+  \end{equation*}
+
+- Subtracting this from the partially linear model yields
+  \begin{equation*}
+    Y_i - \operatorname{E}(Y_i|Z_i) = \left(X_i-\operatorname{E}(X_i|Z_i)\right)'\beta + u_i
+  \end{equation*}
+
+- Defining $\tilde Y_i = Y_i -
+  \operatorname{E}(Y_i|Z_i)$, $\tilde X_i = X_i - \operatorname{E}(X_i|Z_i)$, and appling least squares, we get
+  \begin{equation*}
+    \hat \beta_\text{inf} = \left[
+      \sum_{i=1}^n \tilde X_i \tilde X_i' \right]^{-1} \sum_{i=1}^n
+    \tilde X_i\tilde Y_i
+  \end{equation*}
+
+## Robinson's Partially Linear Model
+
+- Of course, $\hat \beta_\text{inf}$ is infeasible ($\operatorname{E}(Y_i|Z_i)$ and $\operatorname{E}(X_i|Z_i)$ are unknown)
+
+- Robinson replaces these unknown moments with nonparametric estimates
+
+- Under standard regularity conditions, Robinson shows that
+  \begin{equation*}
+    \sqrt{n}(\hat \beta - \beta)\stackrel{d}{\rightarrow }
+    N\left(0, \Phi^{-1}\Psi \Phi^{-1}\right),
+  \end{equation*}
+  provided that $\Phi$ is positive definite, where
+  \begin{equation*}
+    \Phi =  \operatorname{E}[\tilde X_i\tilde X_i'], \Psi = \operatorname{E}[\sigma^2(X_i,Z_i) \tilde
+    X_i\tilde X_i']\text{ and }\tilde X_i =
+    X_i-\operatorname{E}(X_i|Z_i)
+  \end{equation*}
+
+- @ROBINSON:1988 treated the continuous only $Z$   case, while @GAO_LIU_RACINE:2015 consider the mixed-data $Z$ case
+
+## Robinson's Partially Linear Model
+
+- Suppose that we again consider Wooldridge's `wage1` dataset
+
+- First we estimate a linear model that is quadratic in experience
+
+- Then we assume that the researcher is unwilling to specify the nature of the relationship between `exper` and `lwage`
+
+- The researcher hence relegates `exper` to the nonparametric part of a semiparametric partially linear model
+
+- The following presents a summary first from the linear parametric specification and then from the semiparametric partially linear specification
+
+## Robinson's Partially Linear Model {.smaller}
+
+- First, suppose that we model a standard earnings equation using a simple common parametric specification
+
+  ```{r wage1lm}
+  #| echo: true
+  #| eval: true    
+  library(np)
+  data(wage1)
+  model.lm <- lm(lwage~female+married+educ+tenure+exper+I(exper^2),data=wage1)
+  knitr::kable(coef(model.lm),col.names="Coefficient")
+  ```
+
+- The $R^2$ for this model is `r format(summary(model.lm)$r.squared,digits=3)`
+
+## Robinson's Partially Linear Model {.smaller}
+
+- Next, we consider the partially linear specification
+
+- Note that, for identification purposes, there is no intercept term
+
+- Also, there is  no coefficient for `exper` as it has been relegated to the nonparametric component of the model
+
+  ```{r wage1pl}
+  #| echo: true
+  #| eval: true     
+  library(np)
+  data(wage1)
+  model.pl <- npplreg(lwage~female+married+educ+tenure|exper,
+                      data=wage1)
+  knitr::kable(coef(model.pl),digits=7,col.names="Coefficient")
+  ```
+
+- It is interesting to compare this model with the linear model in terms of in-sample fit ($R^2$ for this model is `r format(model.pl$R2,digits=3)` versus $R^2$ = `r format(summary(model.lm)$r.squared,digits=3)` for the parametric
+model)
+
+## Varying Coefficient Models
+
+- Consider a more general semiparametric regression model, the so-called *semiparametric smooth coefficient* model
+
+- This is one of the most flexible models I am aware of
+
+- It nests linear, partially linear, and locally linear models as special cases
+
+- This model also nests a local linear model as a special case
+
+- The smooth coefficient model is given by
+  \begin{equation*}
+    Y_i = \alpha(Z_i) + X_i'\beta(Z_i) + u_i,
+  \end{equation*}
+  where $\beta(z)$ is a vector of unspecified smooth functions of
+  $z$
+
+- When $\beta(z)=\beta_0$, this collapses to the *partially linear* model (i.e.\ $g(z)=\alpha(z)$)
+
+- When $X=Z$, this collapses to the *local linear* model
+
+## Varying Coefficient Models
+
+- We abuse notation slightly and express the model more compactly as
+  \begin{equation*}
+  \small
+    Y_i  =  X_i'\beta(Z_i) + u_i
+  \end{equation*}
+
+- $X_i$ is $p\times 1$ and can incorporate a constant, $\beta(z)$ is a $p\times 1$ dimensional function of $z$, and $z$ is of dimension $q$
+
+- Premultiplying by $X_i$ and taking expectations conditional on $Z_i$ leads to $\operatorname{E}[X_iY_i|Z_i] =\operatorname{E}[X_iX_i'|Z_i]\beta(Z_i)$, yielding
+  \begin{equation*}
+  \small
+    \beta(z) = \left[\operatorname{E}(X_iX_i'|z) \right]^{-1}
+    \operatorname{E}[X_iY_i|z]
+  \end{equation*}
+
+- This suggests the following local constant least squares estimator for $\beta(z)$:
+  \begin{equation*}
+  \small
+    \hat \beta(z) = \left[ \sum_{j=1}^n X_j X_j'
+      K\left(\frac{Z_j-z}{h} \right) \right]^{-1}
+    \sum_{j=1}^n X_j Y_j K\left(\frac{Z_j-z}{h} \right)
+  \end{equation*}
+
+## Varying Coefficient Models
+
+- Under regularity conditions given in @LI_HUANG_LI_FU:2002, we have
+  \begin{equation*}
+    \sqrt{ nh_1\dots h_q } \left(\hat \beta(z) - \beta(z)
+      - \sum_{s=1}^q h^2_s B_s(z)\right)
+    \stackrel{d}{\rightarrow} N(0, \Omega_z)
+  \end{equation*}
+
+- This follows when $M_z\stackrel{\text{def}}{=} f_z(z)\operatorname{E}[X_i X_i'|Z_i=z]$ is positive definite where $B_s(z) = \kappa_2 M_z^{-1}\operatorname{E}[ X_i X_i' \{ \beta_s(z)f_s(X_i,Z_i)/f(X_i|Z_i=z)$ + $f_z(Z_i) \beta_{ss}(Z_i)/2 \} |z]$, $\kappa_2 = \int k(v)v^2dv$, $\beta_s(z) = \partial \beta(z)/\partial z_s$, $\beta_{ss}(z) = \partial^2 \beta(z)/\partial z_s^2$, $\Omega_z = M_z^{-1} V_z M_z^{-1}$, $V_z = \kappa^q f_z(z)\operatorname{E}[ X_i X_i' \sigma^2(X_i,Z_i) |Z_i=z]$, and $\sigma^2(X_i,Z_i) =\operatorname{E}(u_i^2|X_i,Z_i)$
+
+- The categorical only $Z$ case is treated in @LI_OUYANG_RACINE:2013 while the mixed data case is treated in @LI_RACINE:2010
+
+## Varying Coefficient Models
+
+- Suppose that the researcher is unwilling to presume that the coefficients associated with the continuous variables do not vary with respect to the categorical variables `female` and `married`
+
+  ```{r wage1scoef}
+  #| echo: true
+  #| eval: true
+  library(np)
+  data(wage1)
+  model.scoef <- npscoef(lwage~educ+tenure+exper+expersq|female+married,
+                         data=wage1,
+                         betas=TRUE)
+  summary(model.scoef)
+  ```
+
+## Varying Coefficient Models {.smaller}
+
+- Consider the average derivatives from the varying coefficient model
+
+  ```{r wage1scoeftab}
+  #| echo: true
+  #| eval: true  
+  ## The smooth coefficients are vectors, one for each predictor in X (they "vary"
+  ## with Z), so we compute the means of the columns of these coefficients, one for
+  ## each X predictor
+  knitr::kable(colMeans(coef(model.scoef)),digits=7,col.names="Avg. Coefficient")
+  ```
+
+- The average derivatives are comparable in magnitude (except for the intercept), however, the smooth coefficient model performs better than the parametric specification in terms of in-sample fit ($R^2$ = `r format(model.scoef$R2,digits=3)` versus $R^2$ = `r format(summary(model.lm)$r.squared,digits=3)` for the parametric model)
+
+## Single-Index Models
+
+- A semiparametric single index model is of the form
+  \begin{equation*}
+    Y = g(X'\beta_0) + u,
+  \end{equation*}
+  where $Y$ is the dependent variable, $X\in \mathbb{R}^q$ is the vector of explanatory variables, $\beta_0$ is the $q\times 1$ vector of unknown parameters, and $u$ is an error term satisfying $\operatorname{E}(u|X)=0$
+
+- The term $x'\beta_0$ is called a *single index* because it is a scalar (a single index) even though $x$ is a vector
+
+- The functional form of $g(\cdot)$ is unknown to the researcher
+
+- This model is semiparametric in nature since the functional form of the linear index is specified while $g(\cdot)$ is left unspecified
+
+## Identification
+
+- For semiparametric single index models, identification of $\beta_0$ and $g(\cdot)$ requires that
+
+  - $x$ should not contain a constant (intercept)
+  
+  - $x$ must contain at least one continuous variable
+  
+  - Moreover, $||\beta_0|| =1$ or $\beta_{01}=1$ (i.e.\ we need   some normalization of $\beta$)
+  
+  - $g(\cdot)$ is differentiable and is not a constant function on the support of $x'\beta_0$
+  
+  - For the discrete components of $x$, varying the values of the discrete variables will not divide the support of $x'\beta_0$ into disjoint subsets
+
+## Ichimura's Method (Continuous $y$)
+
+- We compute $\beta$ by estimating $g(x'\beta)$ using a local constant estimator and minimizing the following objective function (@ICHIMURA:1993, @HARDLE_HALL_ICHIMURA:1993):
+  \begin{equation*}
+    \label{single_index:eq:hat beta Ich}
+    S_n(\beta,h) = \sum_{i=1}^n
+    \left[Y_i - \hat g_{-i}(X_i'\beta)\right]^2 w(X_i)\mathbf{1}(X_i\in
+    A_n)
+  \end{equation*}
+
+- $\hat g_{-i}(X_i'\beta)$ is a leave-one-out local constant kernel estimator and $h$ the scalar bandwidth for the index $x'\beta$
+
+- $w(X_i)$ is a nonnegative weight function
+
+- $\mathbf{1}(\cdot)$ is the usual indicator function
+
+- That is, ${\bf 1}(X_i\in A_n)$ is a trimming\index{trimming} function which equals one if $X_i\in A_n$, zero otherwise
+
+## Ichimura's Method (Continuous $y$)
+
+- It can be shown that
+  \begin{equation*}
+    \small
+    \sqrt{n} (\hat \beta - \beta_0) \stackrel{d}{\rightarrow} N(0, \Omega_I)
+  \end{equation*}
+
+- Note that $\Omega_{I} = V^{-1}\Sigma V^{-1}$, where
+  \begin{equation*}
+    \small
+    \Sigma = \operatorname{E}\Big\{ w(X_i)\sigma^2(X_i) \left(g^{(1)}_i\right)^2
+    \left(X_i - \operatorname{E}_A(X_i|X_i'\beta_0)\right)
+    \left(X_i - \operatorname{E}_A(X_i|X_i'\beta_0)\right)' \Big\}
+  \end{equation*}
+
+- Note further that $g^{(1)}_i = [ \partial g(v)/\partial v]|_{v=X_i'\beta_0}$, $\operatorname{E}_A(X_i|v) = \operatorname{E}(X_i|x_A'\beta_0 =v)$ with $x_A$ having the distribution of $X_i$ conditional on $X_i\in A_{\delta}$
+
+- Finally, note that
+  \begin{equation*}
+    \small
+    V = \operatorname{E}\left[ w(X_i) \left(g^{(1)}_i\right)^2 \left(X_i - \operatorname{E}_A(X_i|X_i'\beta_0)\right)
+      \left(X_i - \operatorname{E}_A(X_i|X_i'\beta_0)\right)'\right]
+  \end{equation*}
+
+## Ichimura's Method (Continuous $y$) {.smaller}
+
+- We revisit Wooldridge's wage1 dataset and estimate a sigle-index model using Ichimura's method
+
+  ```{r wage1index}
+  #| echo: true
+  #| eval: true
+  library(np)
+  data(wage1)
+  model.index <- npindex(lwage~educ+
+                         tenure+
+                         exper+
+                         expersq+
+                         female+
+                         married,
+                         method="ichimura",
+                         data=wage1)
+  summary(model.index)
+  ```
+
+- It is interesting to compare this with the linear, partially linear, and varying coefficient specifications in terms of in-sample fit ($R^2$ = `r format(model.pl$R2,digits=3)` for the partially linear model, $R^2$ = `r format(model.scoef$R2,digits=3)` for the smooth coefficient model, $R^2$ = `r format(summary(model.lm)$r.squared,digits=3)` for the parametric model)
+
+## Klein \& Spady's Method (binary $y$)
+
+- For binary outcomes, @KLEIN_SPADY:1993 suggested estimating $\beta$ by maximum likelihood methods using a local constant estimator of $g(x'\beta)$
+
+- The estimated log-likelihood function is
+  \begin{equation*}
+    {\mathcal L}(\beta,h) = \sum_i (1-Y_i) \ln(1 - \hat g_{-i}(X_i'\beta)) + \sum_i Y_i
+    \ln[ \hat g_{-i}(X_i'\beta)]
+  \end{equation*}
+
+- Maximizing with respect to $\beta$ and $h$ leads to the semiparametric maximum likelihood estimator of $\beta$, say $\hat \beta_{KS}$ (here $h$ is the smoothing parameter for the scalar index)
+
+- Like Ichimura's estimator, maximization is performed numerically by solving the necessary first order conditions
+
+## Klein \& Spady's Method (binary $y$)
+
+- Klein \& Spady showed that $\hat \beta_{KS}$ is $\sqrt{n}$-consistent and has an asymptotic normal distribution given by
+  \begin{equation*}
+    \sqrt{n}(\hat \beta_{KS} - \beta) \stackrel{d}{\rightarrow} N(0, \Omega_{KS})
+  \end{equation*}
+
+- Note that
+  \begin{equation*}
+    \Omega_{KS} = \left[ \operatorname{E}\left\{
+        \frac{ \partial P}{\partial \beta}
+        \left(\frac{\partial P}{\partial \beta}\right)'\left[\frac{1}{P(1-P)}\right] \right\} \right]^{-1}
+  \end{equation*}
+
+- Also, $P=P(\epsilon <x'\beta)=F_{\epsilon|x}(x'\beta)$, where $F_{\epsilon|x}(\cdot)$ is the CDF of $\epsilon_i$ conditional on $X_i=x$
+
+## Klein \& Spady's Method (binary $y$)
+
+- We consider the birthwt data ($y$ is 0/1) in the MASS package and compute a Logit and a semiparametric index model
+
+- We then compare their confusion matrices and assess their classification ability
+
+- Variables are defined as follows:
+
+  ::: {style="font-size: 70%;"}
+
+  - `low` indicator of birth weight less than 2.5kg
+
+  - `smoke` smoking status during pregnancy
+
+  - `race` mother's race ('1' = white, '2' = black, '3' = other)
+
+  - `ht` history of hypertension
+
+  - `ui` presence of uterine irritability
+
+  - `ftv` number of physician visits during the first trimester
+
+  - `age` mother's age in years
+
+  - `lwt` mother's weight in pounds at last menstrual period
+
+  :::
+
+- Note that all variables other than `age` and `lwt` are categorical in nature
+
+## Klein \& Spady's Method (binary $y$) {.smaller}
+
+- First, consider the parametric Logit model's confusion matrix
+
+  ```{r wage1logit}
+  #| echo: true
+  #| eval: true
+  library(MASS)
+  data("birthwt")
+  model.logit <- glm(low~factor(smoke)+
+                     factor(race)+
+                     factor(ht)+
+                     factor(ui)+
+                     ordered(ftv)+
+                     age+
+                     lwt,
+                     family=binomial(link=logit),data=birthwt)
+  cm.logit <- with(birthwt,table(low, ifelse(fitted(model.logit)>0.5, 1, 0)))
+  ccr.logit <- sum(diag(cm.logit))/sum(cm.logit)
+  knitr::kable(cm.logit)
+  ```
+
+- The correct classification ratio is CCR = `r format(ccr.logit,digits=3)` (the in-sample correct classification ratio is the sum of the diagonals of the confusion matrix divided by the number of observations)
+
+## Klein \& Spady's Method (binary $y$) {.smaller}
+
+- Next, consider the semiparametric single index model's
+  confusion matrix
+
+  ```{r wage1indexks}
+  #| echo: true
+  #| eval: true
+  library(MASS)
+  data(birthwt)
+  library(np)
+  model.index <- npindex(low~factor(smoke)+
+                         factor(race)+
+                         factor(ht)+
+                         factor(ui)+
+                         ordered(ftv)+
+                         age+
+                         lwt,
+                         method="kleinspady",
+                         data=birthwt)
+  cm.index <- with(birthwt,table(low, ifelse(fitted(model.index)>0.5, 1, 0)))
+  ccr.index <- sum(diag(cm.index))/sum(cm.index)
+  knitr::kable(cm.index)
+  ```
+
+- In terms of in-sample fit, the semiparametric model outperforms the parametric Logit model (CCR = `r format(ccr.index,digits=3)` versus CCR = `r format(ccr.logit,digits=3)` for the Logit model)
+
+## Semiparametric Model Summary
+
+- Semiparametric regression models are very popular in applied settings
+
+- They exist to circumvent the *curse of dimensionality*
+
+- They are also popular because they contain scalar parameters that are easy to interpret
+
+- However, realize that since part of the model is parametric and must be specified prior to estimation, these models too can be misspecified, just like their parametric counterparts
+
+- Nonetheless, they are useful models that ought to be part of the applied econometrician's toolkit

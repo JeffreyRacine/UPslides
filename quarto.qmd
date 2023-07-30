@@ -1,0 +1,49 @@
+# Quarto: Technical, Reproducible Documents
+
+## A Sub-Optimal Workflow
+
+- The old way of doing research is to run your analyses using R, then to manually copy figures and tables into a word processor (e.g., MS Word) or typesetter (e.g., $\rm\TeX$) 
+
+- So you end up maintaining separate code, figures, and narrative files and being their go-between coordinator
+
+- And you have pre-committed to an output format!
+
+- Then you find a code or data error and need to redo figures, tables, etc., or need to change output formats
+
+- This is a brutally inefficient and error prone process because it requires a go-between (i.e., you!)
+
+## A Streamlined Workflow
+
+- Quarto places your code and narrative into the same file
+
+- Relieved of coordination duties, new possibilities emerge
+
+  - you now *automatically* refer to analytical results
+
+  - you now *conditionally* describe analytical results
+  
+- If code or data is updated, figures and tables are automatically updated in your output document
+
+- Perhaps best of all, your Quarto file can be *rendered* into any imaginable output format seamlessly via <a href="https://pandoc.org">Pandoc</a>
+
+- (<a href="https://quarto.org">Quarto</a>, <a href="https://github.com">GitHub</a> and <a href=https://rstudio.github.io/renv>renv</a> are all supported in <a href="https://posit.co/products/open-source/rstudio/">RStudio</a>)
+
+## RStudio Quarto Editor Interface
+  
+![](images/rstudio_quarto.png)
+
+# Show and Tell Time <br> Time to Play!
+
+# Summary
+
+- We have barely scratched the surface and have skipped technical details
+
+- However, you now have some perspective and have access to modern tools
+
+- You can consult @racine_2019 if you wish to go deeper (detailed proofs, R code, examples etc.)
+
+- Many of the links in these slides may also be useful
+
+- You may contact me at <a href="mailto:racinej@mcmaster.ca">racinej\@mcmaster.ca</a>
+
+- It has been my pleasure to guide you!
