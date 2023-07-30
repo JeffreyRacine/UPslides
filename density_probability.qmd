@@ -383,9 +383,9 @@ plot(fhat,neval=250,plot.errors.method="bootstrap")
 
 - Skipping technical derivations, in the multivariate case we can show that
     \begin{equation*}
-      \operatorname{bias}\hat f(x) \approx \sum_{s=1}^q \frac{h_s^2}{2}f_{ss}(x)\kappa_2,
+      \operatorname{bias}\hat f(x) \approx \sum_{s=1}^q \frac{h_s^2}{2}f_{ss}(x)\kappa_2
     \end{equation*}
-     based on a *second order kernel* where $0< \kappa_2 = \int z^2 K(z)\, dz<\infty$, where $f_{ss}(x)$ is the second-order derivative of $f(x)$ with respect to $x_s$
+     based on a *second order kernel* ($0< \kappa_2 = \int z^2 K(z)\, dz<\infty$) where $f_{ss}(x)$ is the second-order derivative of $f(x)$ with respect to $x_s$
      
 - We can also show in the multivariate case that 
     \begin{equation*}
