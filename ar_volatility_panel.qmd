@@ -123,6 +123,31 @@
 
 ## Nonparametric AR Models
 
+```{r arimatsnpregcode}
+#| echo: true
+#| eval: false
+library(np)
+## Simulate data from a stationary univariate AR(1) process
+set.seed(42)
+n <- 100
+y <- arima.sim(n = n, list(ar = c(0.9)))
+## Conduct local constant estimation of y on four lags
+ghat.4 <- npreg(y~lag(y,-1)+lag(y,-2)+lag(y,-3)+lag(y,-4))
+## Re-fit the model using only 1 lag
+ghat.1 <- npreg(y~lag(y,-1))
+## cbind(ts(fitted(ghat.4),start=5),ts(fitted(ghat.1),start=2))
+## Plot the data and nonparametric fit
+plot(y,lwd=2)
+lines(ts(fitted(ghat.4),start=5),col=2,lty=2,lwd=2)
+points(ts(fitted(ghat.1),start=2),col=3)
+legend("topright",c("Series",
+                    "npreg() including 4 lags",
+                    "npreg() including 1 lag"),
+                    lty=c(1,2,NA),col=1:3,lwd=c(2,2,NA),pch=c(NA,NA,1),bty="n")
+```
+
+## Nonparametric AR Models
+
 ```{r arimatsnpreg,fig.asp=0.65}
 #| echo: false
 #| label: fig-arimatsnpreg
@@ -199,7 +224,7 @@ summary(ghat.4)
 
 - Refitting the model with only one lag produces the same fit which confirms that both estimates use only one predictor
 
-## Nonparametric AR Models (Lag Inference) {.smaller}
+## Nonparametric AR Models (Lag Inference)
 
 ```{r arimatsnpregsig}
 #| echo: true
@@ -228,7 +253,7 @@ npsigtest(ghat.4)
   model <- npglpreg(y~y.lag.1+y.lag.2+y.lag.3+y.lag.4,nmulti=5,degree.max=5)
   ```
 
-## Nonparametric AR Models {.smaller}
+## Nonparametric AR Models
 
 ```{r npglreuhaiteh}
 #| echo: true
