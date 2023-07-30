@@ -358,7 +358,7 @@ model)
 
 ## Klein \& Spady's Method (binary $y$)
 
-- We consider the birthwt data ($y$ is 0/1) in the MASS package and compute a Logit and a semiparametric index model
+- We consider the `birthwt` data ($y$ is 0/1) in the `MASS` package and compute a Logit and a semiparametric index model`
 
 - We then compare their confusion matrices and assess their classification ability
 
