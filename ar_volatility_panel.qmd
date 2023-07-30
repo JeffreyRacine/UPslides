@@ -234,11 +234,11 @@ npsigtest(ghat.4.lags)
 
 ## Nonparametric AR Models
 
-- The generalized local polynomial estimator [@HALL_RACINE:2015] uses cross-validation to select the polynomial degree vector and bandwidth vector
+- The generalized local polynomial estimator [@HALL_RACINE:2015] uses cross-validation to select the bandwidth vector *and* polynomial degree vector, as opposed to the ad hoc choice of `regtype="lc"` or `regtype="ll"` (polynomials or order 0 or 1, respectively)
 
 - In the case of the linear time series AR(1) DGP used above with lag and polynomial degree uncertainty, we examine how it performs
 
-- We will also fit a correctly specified parametric AR(1) model and compare the first few fitted values
+- We will also fit a correctly specified *linear parametric* AR(1) model and compare the first few fitted values
 
   ```{r npglpregtsar1}
   #| echo: true
@@ -250,14 +250,14 @@ npsigtest(ghat.4.lags)
   y.lag.2 <- c(rep(NA,2),y[1:(n-2)])
   y.lag.3 <- c(rep(NA,3),y[1:(n-3)])
   y.lag.4 <- c(rep(NA,4),y[1:(n-4)])
-  model <- npglpreg(y~y.lag.1+y.lag.2+y.lag.3+y.lag.4,nmulti=5,degree.max=5)
+  model.glp <- npglpreg(y~y.lag.1+y.lag.2+y.lag.3+y.lag.4,nmulti=5,degree.max=5)
   ```
 
 ## Nonparametric AR Models
 
 ```{r npglreuhaiteh}
 #| echo: true
-summary(model)
+summary(model.glp)
 ```
 
 ## Nonparametric AR Models
@@ -278,13 +278,14 @@ summary(model.lm)
 #| echo: true
 ## Examine the first few fitted values from the nonparametric and
 ## linear AR(1) models
-cbind(fitted(model),fitted(model.lm))[1:10,]
+cbind(fitted(model.glp),fitted(model.lm))[1:10,]
 ```
 
 ## Nonparametric AR Models
-- This method correctly selects the degree for the first lag (the AR(1) process is a linear process, so the degree `r model$degree[1]` with a large bandwidth is appropriate)
 
-- It correctly selects a large bandwidth and a constant function (degree `r model$degree[2]`) for the remaining lags resulting in a globally linear model that is a function of the first lag of $Y$ only
+- This method correctly selects the degree for the first lag (the AR(1) process is a linear process, so the degree `r model.glp$degree[1]` with a large bandwidth is appropriate)
+
+- It correctly selects a large bandwidth and a constant function (degree `r model.glp$degree[2]`) for the remaining lags resulting in a globally linear model that is a function of the first lag of $Y$ only
 
 - Since the nonparametric model has effectively shrunk a four-dimensional object to what one would obtain using linear regression *and* knowing which lag to use, it has delivered a $\sqrt{n}$-consistent estimator
 

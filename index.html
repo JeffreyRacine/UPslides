@@ -1903,10 +1903,10 @@ with + measure}
 <section id="nonparametric-ar-models-8" class="slide level2 center">
 <h2>Nonparametric AR Models</h2>
 <ul>
-<li class="fragment"><p>The generalized local polynomial estimator <span class="citation" data-cites="HALL_RACINE:2015">(<a href="#/references-scrollable" role="doc-biblioref" onclick="">Hall and Racine 2015</a>)</span> uses cross-validation to select the polynomial degree vector and bandwidth vector</p></li>
+<li class="fragment"><p>The generalized local polynomial estimator <span class="citation" data-cites="HALL_RACINE:2015">(<a href="#/references-scrollable" role="doc-biblioref" onclick="">Hall and Racine 2015</a>)</span> uses cross-validation to select the bandwidth vector <em>and</em> polynomial degree vector, as opposed to the ad hoc choice of <code>regtype="lc"</code> or <code>regtype="ll"</code> (polynomial or order 0 or 1, respectively)</p></li>
 <li class="fragment"><p>In the case of the linear time series AR(1) DGP used above with lag and polynomial degree uncertainty, we examine how it performs</p></li>
 <li class="fragment"><p>We will also fit a correctly specified parametric AR(1) model and compare the first few fitted values</p>
-<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/npglpregtsar1_22d621d57cf8a72a80c2bbf6dc148719">
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/npglpregtsar1_ae8f3ab9e520188231b2576166cca98e">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="do">## npglpreg() does not support time series objects, so we manually</span></span>
 <span id="cb23-2"><a href="#cb23-2"></a><span class="do">## create the lagged series</span></span>
 <span id="cb23-3"><a href="#cb23-3"></a><span class="fu">library</span>(crs)</span>
@@ -1915,14 +1915,14 @@ with + measure}
 <span id="cb23-6"><a href="#cb23-6"></a>y.lag<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="cn">NA</span>,<span class="dv">2</span>),y[<span class="dv">1</span><span class="sc">:</span>(n<span class="dv">-2</span>)])</span>
 <span id="cb23-7"><a href="#cb23-7"></a>y.lag<span class="fl">.3</span> <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="cn">NA</span>,<span class="dv">3</span>),y[<span class="dv">1</span><span class="sc">:</span>(n<span class="dv">-3</span>)])</span>
 <span id="cb23-8"><a href="#cb23-8"></a>y.lag<span class="fl">.4</span> <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="cn">NA</span>,<span class="dv">4</span>),y[<span class="dv">1</span><span class="sc">:</span>(n<span class="dv">-4</span>)])</span>
-<span id="cb23-9"><a href="#cb23-9"></a>model <span class="ot">&lt;-</span> <span class="fu">npglpreg</span>(y<span class="sc">~</span>y.lag<span class="fl">.1</span><span class="sc">+</span>y.lag<span class="fl">.2</span><span class="sc">+</span>y.lag<span class="fl">.3</span><span class="sc">+</span>y.lag<span class="fl">.4</span>,<span class="at">nmulti=</span><span class="dv">5</span>,<span class="at">degree.max=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-9"><a href="#cb23-9"></a>model.glp <span class="ot">&lt;-</span> <span class="fu">npglpreg</span>(y<span class="sc">~</span>y.lag<span class="fl">.1</span><span class="sc">+</span>y.lag<span class="fl">.2</span><span class="sc">+</span>y.lag<span class="fl">.3</span><span class="sc">+</span>y.lag<span class="fl">.4</span>,<span class="at">nmulti=</span><span class="dv">5</span>,<span class="at">degree.max=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></li>
 </ul>
 </section>
 <section id="nonparametric-ar-models-9" class="slide level2 center">
 <h2>Nonparametric AR Models</h2>
-<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/npglreuhaiteh_fd7c8ddd4c7223b8098e6306c2a5d3dd">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="fu">summary</span>(model)</span>
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/npglreuhaiteh_4386352cc472814502c8be6b73bcfad0">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="fu">summary</span>(model.glp)</span>
 <span id="cb24-2"><a href="#cb24-2"></a><span class="do">## Call:</span></span>
 <span id="cb24-3"><a href="#cb24-3"></a><span class="do">## npglpreg.formula(formula = y ~ y.lag.1 + y.lag.2 + y.lag.3 + </span></span>
 <span id="cb24-4"><a href="#cb24-4"></a><span class="do">##     y.lag.4, nmulti = 5, degree.max = 5)</span></span>
@@ -1935,10 +1935,10 @@ with + measure}
 <span id="cb24-11"><a href="#cb24-11"></a><span class="do">## Bandwidth type: fixed</span></span>
 <span id="cb24-12"><a href="#cb24-12"></a><span class="do">## Continuous kernel type: gaussian</span></span>
 <span id="cb24-13"><a href="#cb24-13"></a><span class="do">## Continuous kernel order: 2</span></span>
-<span id="cb24-14"><a href="#cb24-14"></a><span class="do">## Bandwidth for y.lag.1: 1168820 (scale factor = 1006481)</span></span>
-<span id="cb24-15"><a href="#cb24-15"></a><span class="do">## Bandwidth for y.lag.2: 2342184516 (scale factor = 2041018175)</span></span>
-<span id="cb24-16"><a href="#cb24-16"></a><span class="do">## Bandwidth for y.lag.3: 30444184 (scale factor = 26858320)</span></span>
-<span id="cb24-17"><a href="#cb24-17"></a><span class="do">## Bandwidth for y.lag.4: 1344796 (scale factor = 1195728)</span></span>
+<span id="cb24-14"><a href="#cb24-14"></a><span class="do">## Bandwidth for y.lag.1: 2236767 (scale factor = 1926099)</span></span>
+<span id="cb24-15"><a href="#cb24-15"></a><span class="do">## Bandwidth for y.lag.2: 1507493 (scale factor = 1313654)</span></span>
+<span id="cb24-16"><a href="#cb24-16"></a><span class="do">## Bandwidth for y.lag.3: 1510034 (scale factor = 1332174)</span></span>
+<span id="cb24-17"><a href="#cb24-17"></a><span class="do">## Bandwidth for y.lag.4: 320288375 (scale factor = 284785113)</span></span>
 <span id="cb24-18"><a href="#cb24-18"></a><span class="do">## Degree for y.lag.1: 1</span></span>
 <span id="cb24-19"><a href="#cb24-19"></a><span class="do">## Degree for y.lag.2: 0</span></span>
 <span id="cb24-20"><a href="#cb24-20"></a><span class="do">## Degree for y.lag.3: 0</span></span>
@@ -1947,7 +1947,7 @@ with + measure}
 <span id="cb24-23"><a href="#cb24-23"></a><span class="do">## Multiple R-squared: 0.812</span></span>
 <span id="cb24-24"><a href="#cb24-24"></a><span class="do">## Cross-validation score: 0.84938168</span></span>
 <span id="cb24-25"><a href="#cb24-25"></a><span class="do">## Number of multistarts: 5</span></span>
-<span id="cb24-26"><a href="#cb24-26"></a><span class="do">## Estimation time: 15.2 seconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-26"><a href="#cb24-26"></a><span class="do">## Estimation time: 24.6 seconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="nonparametric-ar-models-10" class="slide level2 center">
@@ -1976,10 +1976,10 @@ with + measure}
 </section>
 <section id="nonparametric-ar-models-11" class="slide level2 center">
 <h2>Nonparametric AR Models</h2>
-<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/npglreuhaitehsdfsps_7c827b05e8b032f208ac786abe905902">
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/npglreuhaitehsdfsps_d68aa17907f6061a4035f7bedb521817">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a><span class="do">## Examine the first few fitted values from the nonparametric and</span></span>
 <span id="cb26-2"><a href="#cb26-2"></a><span class="do">## linear AR(1) models</span></span>
-<span id="cb26-3"><a href="#cb26-3"></a><span class="fu">cbind</span>(<span class="fu">fitted</span>(model),<span class="fu">fitted</span>(model.lm))[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,]</span>
+<span id="cb26-3"><a href="#cb26-3"></a><span class="fu">cbind</span>(<span class="fu">fitted</span>(model.glp),<span class="fu">fitted</span>(model.lm))[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,]</span>
 <span id="cb26-4"><a href="#cb26-4"></a><span class="do">##          [,1]       [,2]</span></span>
 <span id="cb26-5"><a href="#cb26-5"></a><span class="do">## 5  -1.0355583 -1.0355583</span></span>
 <span id="cb26-6"><a href="#cb26-6"></a><span class="do">## 6  -0.4088536 -0.4088536</span></span>
