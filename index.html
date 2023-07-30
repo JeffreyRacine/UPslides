@@ -831,7 +831,7 @@ f_H(x)=\frac{1}{nh}\sum_{i=1}^n\mathbf{1}(X_i\text{ is in the same bin as }x)
 <section id="smooth-univariate-density-estimation-2" class="slide level2 center">
 <h2>Smooth Univariate Density Estimation</h2>
 <ul>
-<li class="fragment"><p>The pointwise bias is <span class="math display">\[\begin{equation*}
+<li class="fragment"><p>The pointwise bias (based on a <em>second order kernel</em>, i.e., <span class="math inline">\(\kappa_2\ne0\)</span>) is <span class="math display">\[\begin{equation*}
     \operatorname{bias}\hat f(x)\approx \frac{h^2}{2}f^{''}(x)\kappa_2,\qquad \kappa_2=\int z^2K(z)\,dz&lt;\infty
   \end{equation*}\]</span></p></li>
 <li class="fragment"><p>Note that the bias falls as <span class="math inline">\(h\)</span> decreases</p></li>
@@ -1261,18 +1261,18 @@ y=\hat g(x)+\hat\epsilon
 <section id="nonparametric-regression-5" class="slide level2 center">
 <h2>Nonparametric Regression</h2>
 <ul>
-<li class="fragment"><p>The pointwise bias (univariate <span class="math inline">\(X\)</span>) is given by <span class="math display">\[\begin{equation*}
+<li class="fragment"><p>The pointwise bias (using a <em>second order kernel</em>, i.e., <span class="math inline">\(\kappa_2\ne0\)</span>, when <span class="math inline">\(X\in\mathbb{R}^1\)</span>) is <span class="math display">\[\begin{equation*}
     \operatorname{bias}\hat g(x)\approx \frac{h^2}{2f(x)}\left\{2g'(x)f'(x)+g^{''}(x)f(x)\right\}\kappa_2
   \end{equation*}\]</span></p></li>
-<li class="fragment"><p>The pointwise variance (univariate <span class="math inline">\(X\)</span>) is given by <span class="math display">\[\begin{equation*}
+<li class="fragment"><p>The pointwise variance (univariate <span class="math inline">\(X\)</span>) is <span class="math display">\[\begin{equation*}
     \operatorname{var}\hat g(x)
     \approx\frac{\sigma^2(x)}{nhf(x)}\kappa
   \end{equation*}\]</span></p></li>
 <li class="fragment"><p>The bias once again falls as <span class="math inline">\(h\)</span> decreases, while variance again rises as <span class="math inline">\(h\)</span> decreases</p></li>
 </ul>
 </section>
-<section id="nonparametric-regression-6" class="slide level2 center">
-<h2>Nonparametric Regression</h2>
+<section id="data-driven-bandwidth-selection" class="slide level2 center">
+<h2>Data-Driven Bandwidth Selection</h2>
 <ul>
 <li class="fragment"><p>How one selects the bandwidth <span class="math inline">\(h\)</span> is a key aspect to sound nonparametric analysis, and cross-validation methods are powerful data-driven solutions</p></li>
 <li class="fragment"><p>See <code>bwmethod="cv.ls"</code> in the functions <code>npreg()</code> and <code>npregbw()</code></p></li>
@@ -1282,8 +1282,8 @@ y=\hat g(x)+\hat\epsilon
 \end{equation*}\]</span> where <span class="math inline">\(\hat g_{-i}(X_i) =\sum_{l\neq i}^n Y_l K_\gamma(X_i,x)/\sum_{l\neq i}^n K_\gamma(X_i,x)\)</span> is the leave-one-out kernel estimator of <span class="math inline">\(g(X_i)\)</span>, and <span class="math inline">\(0\leq M(\cdot)\leq 1\)</span> is a weight function which serves to avoid difficulties caused by dividing by zero, or by the slow convergence rate caused by boundary effects</p></li>
 </ul>
 </section>
-<section id="nonparametric-regression-7" class="slide level2 center">
-<h2>Nonparametric Regression</h2>
+<section id="data-driven-bandwidth-selection-1" class="slide level2 center">
+<h2>Data-Driven Bandwidth Selection</h2>
 <ul>
 <li class="fragment"><p>Generalized cross-validation was proposed by <span class="citation" data-cites="CRAVEN_WAHBA:1979">Craven and Wahba (<a href="#/references-scrollable" role="doc-biblioref" onclick="">1979</a>)</span></p></li>
 <li class="fragment"><p>The kernel estimator can be expressed as <span class="math display">\[\begin{equation*}
@@ -1295,8 +1295,8 @@ y=\hat g(x)+\hat\epsilon
 <li class="fragment"><p>Both <span class="math inline">\(CV(h)\)</span> and <span class="math inline">\(GCV(h)\)</span> are consistent estimates of the MISE of <span class="math inline">\(\hat g(x)\)</span></p></li>
 </ul>
 </section>
-<section id="nonparametric-regression-8" class="slide level2 center">
-<h2>Nonparametric Regression</h2>
+<section id="data-driven-bandwidth-selection-2" class="slide level2 center">
+<h2>Data-Driven Bandwidth Selection</h2>
 <ul>
 <li class="fragment"><p><span class="citation" data-cites="HURVICH_SIMONOFF_TSAI:1998">Hurvich, Simonoff, and Tsai (<a href="#/references-scrollable" role="doc-biblioref" onclick="">1998</a>)</span> proposed an improved information criterion based on minimization of <span class="math display">\[\begin{equation*}
   AIC_c(h)=\log\left[n^{-1}\sum_{i=1}^n\left(Y_i-\hat
@@ -1310,11 +1310,11 @@ y=\hat g(x)+\hat\epsilon
 <li class="fragment"><p>The dataset consists of <span class="math inline">\(n=102\)</span> observations. The dependent variable is the prestige of Canadian occupations (`Pineo-Porter score’) and the explanatory variable is average income for each occupation measured in 1971 Canadian dollars</p></li>
 </ul>
 </section>
-<section id="nonparametric-regression-9" class="slide level2 center">
-<h2>Nonparametric Regression</h2>
+<section id="data-driven-bandwidth-selection-3" class="slide level2 center">
+<h2>Data-Driven Bandwidth Selection</h2>
 
 <img data-src="index_files/figure-revealjs/prestige-1.png" width="960" class="r-stretch quarto-figure-center"></section>
-<section id="nonparametric-regression-10" class="slide level2 center">
+<section id="nonparametric-regression-6" class="slide level2 center">
 <h2>Nonparametric Regression</h2>
 <ul>
 <li class="fragment"><p>As noted previously, the multivariate mixed-data kernel regression estimator is obtained by simply replacing the univariate continuous kernel function in <span class="math inline">\(\eqref{eq:ghat}\)</span> (i.e., <span class="math inline">\(K((X_i-x)/h)\)</span>) with its multivariate mixed-data counterpart (i.e., <span class="math inline">\(K_\gamma(X_i,x)\)</span>)</p></li>
@@ -1326,7 +1326,7 @@ y=\hat g(x)+\hat\epsilon
 <li class="fragment"><p>For technical details (bias, variance etc.) see <span class="citation" data-cites="racine_2019">Racine (<a href="#/references-scrollable" role="doc-biblioref" onclick="">2019</a>)</span></p></li>
 </ul>
 </section>
-<section id="nonparametric-regression-11" class="slide level2 center">
+<section id="nonparametric-regression-7" class="slide level2 center">
 <h2>Nonparametric Regression</h2>
 <ul>
 <li class="fragment"><p>A popular alternative of the local constant estimator is obtained by replacing the <em>constant</em> <span class="math inline">\(\alpha\)</span> in <span class="math inline">\(\mathcal{S}\)</span> by a linear regression function <span class="math inline">\(\alpha+\beta X\)</span> (this is called “local linear” regression - we simply call <code>npreg()</code> with the option <code>regtype="ll"</code>)</p></li>

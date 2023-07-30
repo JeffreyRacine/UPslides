@@ -276,7 +276,7 @@ plot(x,dnorm(x,mean=mean(x),sd=sd(x)),type="l",ylab="Parametric Density Estimate
 
 ## Smooth Univariate Density Estimation
 
-- The pointwise bias is 
+- The pointwise bias (based on a *second order kernel*, i.e., $\kappa_2\ne0$) is 
     \begin{equation*}
       \operatorname{bias}\hat f(x)\approx \frac{h^2}{2}f^{''}(x)\kappa_2,\qquad \kappa_2=\int z^2K(z)\,dz<\infty
     \end{equation*}

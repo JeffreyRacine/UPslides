@@ -74,12 +74,13 @@ we replace $K((x-X_i)/h)$ with $K_\gamma(X_i,x)$ defined previously (we will ret
 
 ## Nonparametric Regression
 
-- The pointwise bias (univariate $X$) is given by
+- The pointwise bias  (using a *second order kernel*, i.e.,
+    $\kappa_2\ne0$, when $X\in\mathbb{R}^1$) is
     \begin{equation*}
       \operatorname{bias}\hat g(x)\approx \frac{h^2}{2f(x)}\left\{2g'(x)f'(x)+g^{''}(x)f(x)\right\}\kappa_2
     \end{equation*}
 
-- The pointwise variance (univariate $X$) is given by
+- The pointwise variance (univariate $X$) is
     \begin{equation*}
       \operatorname{var}\hat g(x)
       \approx\frac{\sigma^2(x)}{nhf(x)}\kappa
@@ -87,7 +88,7 @@ we replace $K((x-X_i)/h)$ with $K_\gamma(X_i,x)$ defined previously (we will ret
 
 - The bias once again falls as $h$ decreases, while variance again rises as $h$ decreases
 
-## Nonparametric Regression
+## Data-Driven Bandwidth Selection
 
 - How one selects the bandwidth $h$ is a key aspect to sound nonparametric analysis, and cross-validation methods are powerful data-driven solutions
 
@@ -100,7 +101,7 @@ we replace $K((x-X_i)/h)$ with $K_\gamma(X_i,x)$ defined previously (we will ret
   \end{equation*}
   where $\hat g_{-i}(X_i) =\sum_{l\neq i}^n Y_l K_\gamma(X_i,x)/\sum_{l\neq i}^n K_\gamma(X_i,x)$ is the leave-one-out kernel estimator of $g(X_i)$, and $0\leq M(\cdot)\leq 1$ is a weight function which serves to avoid difficulties caused by dividing by zero, or by the slow convergence rate caused by boundary effects
   
-## Nonparametric Regression
+## Data-Driven Bandwidth Selection
 
 - Generalized cross-validation was proposed by @CRAVEN_WAHBA:1979
 
@@ -117,7 +118,7 @@ we replace $K((x-X_i)/h)$ with $K_\gamma(X_i,x)$ defined previously (we will ret
 
 - Both $CV(h)$ and $GCV(h)$ are consistent estimates of the MISE of $\hat g(x)$
 
-## Nonparametric Regression
+## Data-Driven Bandwidth Selection
 
 - @HURVICH_SIMONOFF_TSAI:1998 proposed an improved information criterion based on minimization of
   \begin{equation*}
@@ -134,7 +135,7 @@ we replace $K((x-X_i)/h)$ with $K_\gamma(X_i,x)$ defined previously (we will ret
 
 - The dataset consists of $n=102$ observations. The dependent variable is the prestige of Canadian occupations (`Pineo-Porter score') and the explanatory variable is average income for each occupation measured in 1971 Canadian dollars
 
-## Nonparametric Regression
+## Data-Driven Bandwidth Selection
 
 ```{r prestige}
 rm(list=ls())
