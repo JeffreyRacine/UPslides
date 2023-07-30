@@ -404,7 +404,7 @@ plot(fhat,neval=250,plot.errors.method="bootstrap")
     
     - the rate of convergence depends on the number of numeric variables involved (the "curse-of-dimensionality")
   
-- We use data-driven methods for bandwidth selection when $q>1$ (e.g., likelihood and least-squares cross-validation) 
+- We continue to use data-driven methods for bandwidth selection when $q>1$ (e.g., likelihood and least-squares cross-validation) 
 
 - Since optimal bandwidths typically differ across variables ($h_1\ne h_2$, etc.) we conduct $q$-dimensional numerical optimization
 
