@@ -1106,7 +1106,7 @@ K_\gamma(X_i,x)=\prod_{j=1}^q[\dots]\prod_{j=1}^r[\dots]\prod_{j=1}^s[\dots]
 <h2>Example - Mixed Data Density</h2>
 <ul>
 <li class="fragment"><p>We use Wooldridge’s <code>wage1</code> data and consider two variables, one numeric (<code>lwage</code>) and one ordered (<code>numdep</code>)</p></li>
-<li class="fragment"><p><code>lwage</code> is the logarithm of an individual’s average hourly earnings, and <code>numdep</code> is their number of dependents</p></li>
+<li class="fragment"><p><code>lwage</code> is the logarithm of an individual’s average hourly earnings, and <code>numdep</code> is their number of dependants</p></li>
 <li class="fragment"><p>The number of observations in each <em>cell</em> is tabulated in <a href="#/example---mixed-data-density">Table&nbsp;1</a></p>
 <div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/tbl-wage1mixedtable_684c1cc91e7e28e0a4be2baaa4c1333b">
 <div class="cell-output-display">
@@ -1679,13 +1679,13 @@ with + measure}
 <li class="fragment"><p>In R, one can create time-series from numeric data representing data sampled at equispaced points in time</p></li>
 <li class="fragment"><p>To do this, simply cast the data object as <code>ts()</code> (per the following example)</p></li>
 <li class="fragment"><p>After this, R functions will act appropriately (e.g., <code>plot()</code> recognizes <code>ts()</code> so the horizontal axis is time, lines connect points, etc.)</p>
-<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/tscasting_07a131d8da0978aaf890b9fb454f2690">
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/tscasting_b24506d260dd92e4629d87f4fa618a43">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="do">## Example 1 - create a simple time series that begins on the 2nd Quarter of</span></span>
 <span id="cb16-2"><a href="#cb16-2"></a><span class="do">## 1959</span></span>
 <span id="cb16-3"><a href="#cb16-3"></a>x <span class="ot">&lt;-</span> <span class="fu">ts</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">frequency =</span> <span class="dv">4</span>, <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">1959</span>, <span class="dv">2</span>))</span>
 <span id="cb16-4"><a href="#cb16-4"></a><span class="fu">print</span>(x)</span>
 <span id="cb16-5"><a href="#cb16-5"></a><span class="fu">plot</span>(x)</span>
-<span id="cb16-6"><a href="#cb16-6"></a><span class="do">## Excample 2 - create simulated data from an ARIMA model that begins on the 2nd</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a><span class="do">## Example 2 - create simulated data from an ARIMA model that begins on the 2nd</span></span>
 <span id="cb16-7"><a href="#cb16-7"></a><span class="do">## Quarter of 1959</span></span>
 <span id="cb16-8"><a href="#cb16-8"></a>x <span class="ot">&lt;-</span> <span class="fu">ts</span>(<span class="fu">arima.sim</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="fu">list</span>(<span class="at">ar =</span> <span class="fu">c</span>(<span class="fl">0.8897</span>, <span class="sc">-</span><span class="fl">0.4858</span>), </span>
 <span id="cb16-9"><a href="#cb16-9"></a>                               <span class="at">ma =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.2279</span>, <span class="fl">0.2488</span>)),</span>
@@ -2136,7 +2136,7 @@ Y_{it}=g(X_{it}) +\varepsilon_{it},
 \end{equation}\]</span> where <span class="math inline">\(i=1,\ldots ,n\)</span>, <span class="math inline">\(t=1,\ldots ,T\)</span>, <span class="math inline">\(Y_{it}\)</span> is the endogenous variable, <span class="math inline">\(X_{it}=\left( X_{it1},\ldots ,X_{itq}\right)^{\mathrm{T}}\)</span> is a vector of <span class="math inline">\(q\)</span> exogenous variables, and <span class="math inline">\(g(\cdot)\)</span> is an unknown smooth function</p></li>
 <li class="fragment"><p>Let <span class="math inline">\(\varepsilon_{it}\)</span> have a random effects specification, i.e., <span class="math display">\[\begin{equation*}
 \varepsilon_{it}=u_{i}+v_{it},
-\end{equation*}\]</span> where <span class="math inline">\(u_{i}\)</span> is i.i.d.&nbsp;<span class="math inline">\(\left( 0,\sigma_{u}^{2}\right)\)</span>, <span class="math inline">\(v_{it}\)</span> is i.i.d. <span class="math inline">\(\left( 0,\sigma_{v}^{2}\right)\)</span>, and <span class="math inline">\(u_{i}\)</span> and <span class="math inline">\(v_{it}\)</span> are uncorrelated for all <span class="math inline">\(i\)</span> and <span class="math inline">\(t\)</span></p></li>
+\end{equation*}\]</span> where <span class="math inline">\(u_{i}\)</span> is i.i.d. <span class="math inline">\(\left( 0,\sigma_{u}^{2}\right)\)</span>, <span class="math inline">\(v_{it}\)</span> is i.i.d. <span class="math inline">\(\left( 0,\sigma_{v}^{2}\right)\)</span>, and <span class="math inline">\(u_{i}\)</span> and <span class="math inline">\(v_{it}\)</span> are uncorrelated for all <span class="math inline">\(i\)</span> and <span class="math inline">\(t\)</span></p></li>
 <li class="fragment"><p>Let <span class="math inline">\(\varepsilon_{i}=\left( \varepsilon_{i1},\ldots,\varepsilon_{iT}\right) ^{\mathrm{T}}\)</span> be a <span class="math inline">\(T\times 1\)</span> vector</p></li>
 </ul>
 </section>
@@ -2429,7 +2429,7 @@ c&amp;c&amp;c&amp;\dots&amp; 1
 <li class="fragment"><p>Subtracting this from the partially linear model yields <span class="math display">\[\begin{equation*}
   Y_i - \operatorname{E}(Y_i|Z_i) = \left(X_i-\operatorname{E}(X_i|Z_i)\right)'\beta + u_i
 \end{equation*}\]</span></p></li>
-<li class="fragment"><p>Defining <span class="math inline">\(\tilde Y_i = Y_i - \operatorname{E}(Y_i|Z_i)\)</span>, <span class="math inline">\(\tilde X_i = X_i - \operatorname{E}(X_i|Z_i)\)</span>, and appling least squares, we get <span class="math display">\[\begin{equation*}
+<li class="fragment"><p>Defining <span class="math inline">\(\tilde Y_i = Y_i - \operatorname{E}(Y_i|Z_i)\)</span>, <span class="math inline">\(\tilde X_i = X_i - \operatorname{E}(X_i|Z_i)\)</span>, and applying least squares, we get <span class="math display">\[\begin{equation*}
   \hat \beta_\text{inf} = \left[
     \sum_{i=1}^n \tilde X_i \tilde X_i' \right]^{-1} \sum_{i=1}^n
   \tilde X_i\tilde Y_i
@@ -2725,7 +2725,7 @@ c&amp;c&amp;c&amp;\dots&amp; 1
   A_n)
 \end{equation*}\]</span></p></li>
 <li class="fragment"><p><span class="math inline">\(\hat g_{-i}(X_i'\beta)\)</span> is a leave-one-out local constant kernel estimator and <span class="math inline">\(h\)</span> the scalar bandwidth for the index <span class="math inline">\(x'\beta\)</span></p></li>
-<li class="fragment"><p><span class="math inline">\(w(X_i)\)</span> is a nonnegative weight function</p></li>
+<li class="fragment"><p><span class="math inline">\(w(X_i)\)</span> is a non-negative weight function</p></li>
 <li class="fragment"><p><span class="math inline">\(\mathbf{1}(\cdot)\)</span> is the usual indicator function</p></li>
 <li class="fragment"><p>That is, <span class="math inline">\({\bf 1}(X_i\in A_n)\)</span> is a trimming function which equals one if <span class="math inline">\(X_i\in A_n\)</span>, zero otherwise</p></li>
 </ul>
@@ -2754,7 +2754,7 @@ c&amp;c&amp;c&amp;\dots&amp; 1
 <section id="ichimuras-method-continuous-y-2" class="slide level2 smaller center">
 <h2>Ichimura’s Method (Continuous <span class="math inline">\(y\)</span>)</h2>
 <ul>
-<li class="fragment"><p>We revisit Wooldridge’s wage1 dataset and estimate a sigle-index model using Ichimura’s method</p>
+<li class="fragment"><p>We revisit Wooldridge’s wage1 dataset and estimate a single-index model using Ichimura’s method</p>
 <div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/wage1index_faddbe8c809e639970e51590bbf648ed">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="fu">library</span>(np)</span>
 <span id="cb35-2"><a href="#cb35-2"></a><span class="fu">data</span>(wage1)</span>

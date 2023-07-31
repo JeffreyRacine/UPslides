@@ -65,7 +65,7 @@ observationally equivalent to the sum of the old ones
   \end{equation*}
 
 - Defining $\tilde Y_i = Y_i -
-  \operatorname{E}(Y_i|Z_i)$, $\tilde X_i = X_i - \operatorname{E}(X_i|Z_i)$, and appling least squares, we get
+  \operatorname{E}(Y_i|Z_i)$, $\tilde X_i = X_i - \operatorname{E}(X_i|Z_i)$, and applying least squares, we get
   \begin{equation*}
     \hat \beta_\text{inf} = \left[
       \sum_{i=1}^n \tilde X_i \tilde X_i' \right]^{-1} \sum_{i=1}^n
@@ -273,7 +273,7 @@ model)
 
 - $\hat g_{-i}(X_i'\beta)$ is a leave-one-out local constant kernel estimator and $h$ the scalar bandwidth for the index $x'\beta$
 
-- $w(X_i)$ is a nonnegative weight function
+- $w(X_i)$ is a non-negative weight function
 
 - $\mathbf{1}(\cdot)$ is the usual indicator function
 
@@ -306,7 +306,7 @@ model)
 
 ## Ichimura's Method (Continuous $y$) {.smaller}
 
-- We revisit Wooldridge's wage1 dataset and estimate a sigle-index model using Ichimura's method
+- We revisit Wooldridge's wage1 dataset and estimate a single-index model using Ichimura's method
 
   ```{r wage1index}
   #| echo: true

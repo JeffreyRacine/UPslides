@@ -16,7 +16,7 @@
   x <- ts(1:10, frequency = 4, start = c(1959, 2))
   print(x)
   plot(x)
-  ## Excample 2 - create simulated data from an ARIMA model that begins on the 2nd
+  ## Example 2 - create simulated data from an ARIMA model that begins on the 2nd
   ## Quarter of 1959
   x <- ts(arima.sim(n = 10, list(ar = c(0.8897, -0.4858), 
                                  ma = c(-0.2279, 0.2488)),
@@ -479,7 +479,7 @@ i.e.,
 \begin{equation*}
 \varepsilon_{it}=u_{i}+v_{it},
 \end{equation*}
-where $u_{i}$ is i.i.d.\ $\left( 0,\sigma_{u}^{2}\right)$, $v_{it}$ is i.i.d. $\left( 0,\sigma_{v}^{2}\right)$, and $u_{i}$ and $v_{it}$ are uncorrelated for all $i$ and $t$
+where $u_{i}$ is i.i.d. $\left( 0,\sigma_{u}^{2}\right)$, $v_{it}$ is i.i.d. $\left( 0,\sigma_{v}^{2}\right)$, and $u_{i}$ and $v_{it}$ are uncorrelated for all $i$ and $t$
 
 - Let
 $\varepsilon_{i}=\left( \varepsilon_{i1},\ldots,\varepsilon_{iT}\right) ^{\mathrm{T}}$ be a $T\times 1$ vector
@@ -508,7 +508,7 @@ with $\Sigma_{1}=\sigma_{v}^{-2}$ and
 $\Sigma_{2}=-\left( \sigma_{v}^{2}+\sigma_{u}^{2}T\right)
 ^{-1}\sigma_{u}^{2}\sigma_{v}^{-2}$
 
-- Let $A=\Omega^{-1/2}$ be the square root of $\Omega^{-1}$ such that $AA^{\mathrm{T}}=\Omega^{-1}$ (use e.g.\ Cholesky decomposition, $A$ is a lower triangular matrix)
+- Let $A=\Omega^{-1/2}$ be the square root of $\Omega^{-1}$ such that $AA^{\mathrm{T}}=\Omega^{-1}$ (use e.g. Cholesky decomposition, $A$ is a lower triangular matrix)
 
 ## Random Effects Models
 
