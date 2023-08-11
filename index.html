@@ -8,7 +8,7 @@
 <link href="index_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="index_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.433">
+  <meta name="generator" content="quarto-1.3.450">
 
   <meta name="author" content="Jeffrey S. Racine">
   <title>Nonparametric Workshop</title>
@@ -1525,13 +1525,13 @@ y=\hat g(x)+\hat\epsilon
 <span id="cb10-5"><a href="#cb10-5"></a><span class="fu">summary</span>(ghat)</span>
 <span id="cb10-6"><a href="#cb10-6"></a><span class="do">## </span></span>
 <span id="cb10-7"><a href="#cb10-7"></a><span class="do">## Regression Data: 526 training points, in 5 variable(s)</span></span>
-<span id="cb10-8"><a href="#cb10-8"></a><span class="do">##                     female   married     educ    exper   tenure</span></span>
-<span id="cb10-9"><a href="#cb10-9"></a><span class="do">## Bandwidth(s): 1.836551e-08 0.2880919 5.149588 7.185839 28.01246</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="do">##                     female  married     educ    exper   tenure</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="do">## Bandwidth(s): 1.613829e-07 0.288114 5.148766 7.185586 28.00388</span></span>
 <span id="cb10-10"><a href="#cb10-10"></a><span class="do">## </span></span>
 <span id="cb10-11"><a href="#cb10-11"></a><span class="do">## Kernel Regression Estimator: Local-Linear</span></span>
 <span id="cb10-12"><a href="#cb10-12"></a><span class="do">## Bandwidth Type: Fixed</span></span>
-<span id="cb10-13"><a href="#cb10-13"></a><span class="do">## Residual standard error: 0.3682319</span></span>
-<span id="cb10-14"><a href="#cb10-14"></a><span class="do">## R-squared: 0.5204119</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a><span class="do">## Residual standard error: 0.3682301</span></span>
+<span id="cb10-14"><a href="#cb10-14"></a><span class="do">## R-squared: 0.5204168</span></span>
 <span id="cb10-15"><a href="#cb10-15"></a><span class="do">## </span></span>
 <span id="cb10-16"><a href="#cb10-16"></a><span class="do">## Continuous Kernel Type: Second-Order Gaussian</span></span>
 <span id="cb10-17"><a href="#cb10-17"></a><span class="do">## No. Continuous Explanatory Vars.: 3</span></span>
@@ -1621,8 +1621,8 @@ with + measure}
 <span id="cb14-5"><a href="#cb14-5"></a><span class="do">## Explanatory variables tested for significance:</span></span>
 <span id="cb14-6"><a href="#cb14-6"></a><span class="do">## female (1), married (2), educ (3), exper (4), tenure (5)</span></span>
 <span id="cb14-7"><a href="#cb14-7"></a><span class="do">## </span></span>
-<span id="cb14-8"><a href="#cb14-8"></a><span class="do">##                     female   married     educ    exper   tenure</span></span>
-<span id="cb14-9"><a href="#cb14-9"></a><span class="do">## Bandwidth(s): 1.836551e-08 0.2880919 5.149588 7.185839 28.01246</span></span>
+<span id="cb14-8"><a href="#cb14-8"></a><span class="do">##                     female  married     educ    exper   tenure</span></span>
+<span id="cb14-9"><a href="#cb14-9"></a><span class="do">## Bandwidth(s): 1.613829e-07 0.288114 5.148766 7.185586 28.00388</span></span>
 <span id="cb14-10"><a href="#cb14-10"></a><span class="do">## </span></span>
 <span id="cb14-11"><a href="#cb14-11"></a><span class="do">## Individual Significance Tests</span></span>
 <span id="cb14-12"><a href="#cb14-12"></a><span class="do">## P Value: </span></span>
@@ -1657,7 +1657,7 @@ with + measure}
 <span id="cb15-8"><a href="#cb15-8"></a><span class="do">##   female    married educ tenure exper</span></span>
 <span id="cb15-9"><a href="#cb15-9"></a><span class="do">## 1   Male Notmarried   12      2  13.5</span></span>
 <span id="cb15-10"><a href="#cb15-10"></a><span class="fu">predict</span>(ghat, <span class="at">newdata=</span>df)</span>
-<span id="cb15-11"><a href="#cb15-11"></a><span class="do">## [1] 1.69906</span></span>
+<span id="cb15-11"><a href="#cb15-11"></a><span class="do">## [1] 1.699062</span></span>
 <span id="cb15-12"><a href="#cb15-12"></a><span class="do">## Or you could use ghat &lt;- npreg(...,newdata=df) and fitted(ghat) </span></span>
 <span id="cb15-13"><a href="#cb15-13"></a><span class="do">## ghat &lt;- npreg(lwage ~ female + married + educ + exper + tenure, </span></span>
 <span id="cb15-14"><a href="#cb15-14"></a><span class="do">##               data=wage1,</span></span>
@@ -1929,10 +1929,10 @@ with + measure}
 <span id="cb24-11"><a href="#cb24-11"></a><span class="do">## Bandwidth type: fixed</span></span>
 <span id="cb24-12"><a href="#cb24-12"></a><span class="do">## Continuous kernel type: gaussian</span></span>
 <span id="cb24-13"><a href="#cb24-13"></a><span class="do">## Continuous kernel order: 2</span></span>
-<span id="cb24-14"><a href="#cb24-14"></a><span class="do">## Bandwidth for y.lag.1: 2236767 (scale factor = 1926099)</span></span>
-<span id="cb24-15"><a href="#cb24-15"></a><span class="do">## Bandwidth for y.lag.2: 1507493 (scale factor = 1313654)</span></span>
-<span id="cb24-16"><a href="#cb24-16"></a><span class="do">## Bandwidth for y.lag.3: 1510034 (scale factor = 1332174)</span></span>
-<span id="cb24-17"><a href="#cb24-17"></a><span class="do">## Bandwidth for y.lag.4: 320288375 (scale factor = 284785113)</span></span>
+<span id="cb24-14"><a href="#cb24-14"></a><span class="do">## Bandwidth for y.lag.1: 1168820 (scale factor = 1006481)</span></span>
+<span id="cb24-15"><a href="#cb24-15"></a><span class="do">## Bandwidth for y.lag.2: 2342184516 (scale factor = 2041018175)</span></span>
+<span id="cb24-16"><a href="#cb24-16"></a><span class="do">## Bandwidth for y.lag.3: 30444184 (scale factor = 26858320)</span></span>
+<span id="cb24-17"><a href="#cb24-17"></a><span class="do">## Bandwidth for y.lag.4: 1344796 (scale factor = 1195728)</span></span>
 <span id="cb24-18"><a href="#cb24-18"></a><span class="do">## Degree for y.lag.1: 1</span></span>
 <span id="cb24-19"><a href="#cb24-19"></a><span class="do">## Degree for y.lag.2: 0</span></span>
 <span id="cb24-20"><a href="#cb24-20"></a><span class="do">## Degree for y.lag.3: 0</span></span>
@@ -1941,7 +1941,7 @@ with + measure}
 <span id="cb24-23"><a href="#cb24-23"></a><span class="do">## Multiple R-squared: 0.812</span></span>
 <span id="cb24-24"><a href="#cb24-24"></a><span class="do">## Cross-validation score: 0.84938168</span></span>
 <span id="cb24-25"><a href="#cb24-25"></a><span class="do">## Number of multistarts: 5</span></span>
-<span id="cb24-26"><a href="#cb24-26"></a><span class="do">## Estimation time: 24.6 seconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-26"><a href="#cb24-26"></a><span class="do">## Estimation time: 15.3 seconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="nonparametric-ar-models-10" class="slide level2 center">
@@ -3115,7 +3115,7 @@ Yu, Keming, and M. C. Jones. 2004. <span>“Likelihood-Based Local Linear Estima
 'autoAnimateUnmatched': true,
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
-'multiplex': {"secret":null,"id":"775d824ec7014bd2","url":"https://reveal-multiplex.glitch.me/"},
+'multiplex': {"secret":null,"id":"c5c69097d62834b0","url":"https://reveal-multiplex.glitch.me/"},
 'smaller': false,
  
         // Display controls in the bottom right corner
