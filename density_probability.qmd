@@ -498,7 +498,7 @@ plot(phat,plot.errors.method="bootstrap")
 
 - $l(X_i,x,\lambda)$ is an *ordered* kernel function given by
 \begin{equation*}
-l(X_i,x,\lambda)=\frac{\lambda^{d_{xi}}}{\Lambda_i}
+l(X_i,x,\lambda)=\frac{\lambda^{d_{xi}}}{\Lambda_i},\quad d_{xi}=|x-X_i|,\quad  \Lambda_i=\sum_{x\in\mathcal{D}}\lambda^{d_{xi}}
 \end{equation*}
 
 - See @racine_2019 for technical details (e.g., bias and variance formulas)
