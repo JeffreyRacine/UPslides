@@ -219,7 +219,7 @@ plot(x,dnorm(x,mean=mean(x),sd=sd(x)),type="l",ylab="Parametric Density Estimate
 
 - The kernel function assigns *higher* weight to observations close to $x$ (i.e., small $Z_i$) than to those lying further away (i.e., large $Z_i$)
 
-- A kernel estimator is *nonparametric* since it does not presume the data is from some known parametric family prior to estimation
+- A kernel estimator is *nonparametric* since, *prior to estimation*, it does not presume the data is drawn from some *known parametric family*
 
 ## Non-Smooth or Smooth?
 
