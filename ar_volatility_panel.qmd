@@ -113,7 +113,7 @@
 
 - For stationary time series, bandwidth selection, estimation, and inference can proceed in general *without modification*; only the non-stationary case requires a separate treatment, which is to be expected
 
-- The function `npreg()` in the R package np supports time series objects and the R `lag()` function can be used to generate the desired lags for a series, as the following code chunk illustrates
+- The function `npreg()` in the R package `np` supports time series objects and the R `lag()` function can be used to generate the desired lags for a series, as the following code chunk illustrates
 
 - The figure on the following slide presents a simulated time series and the local constant kernel estimate
 

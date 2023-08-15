@@ -1778,7 +1778,7 @@ with + measure}
 <h2>Nonparametric AR Models</h2>
 <ul>
 <li class="fragment"><p>For stationary time series, bandwidth selection, estimation, and inference can proceed in general <em>without modification</em>; only the non-stationary case requires a separate treatment, which is to be expected</p></li>
-<li class="fragment"><p>The function <code>npreg()</code> in the R package np supports time series objects and the R <code>lag()</code> function can be used to generate the desired lags for a series, as the following code chunk illustrates</p></li>
+<li class="fragment"><p>The function <code>npreg()</code> in the R package <code>np</code> supports time series objects and the R <code>lag()</code> function can be used to generate the desired lags for a series, as the following code chunk illustrates</p></li>
 <li class="fragment"><p>The figure on the following slide presents a simulated time series and the local constant kernel estimate</p></li>
 <li class="fragment"><p>The DGP is given by <span class="math inline">\(Y_t=0.9Y_{t-1}+\epsilon_t\)</span>, a linear stationary AR(1) process</p></li>
 <li class="fragment"><p>Given the uncertainty regarding the appropriate lag order, we include four lags of <span class="math inline">\(Y_t\)</span> in the nonparametric model</p></li>
