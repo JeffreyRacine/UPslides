@@ -347,7 +347,7 @@ par(mfrow=c(2,3))
 plot(ghat,gradients=TRUE,plot.errors.method="bootstrap")
 ```
 
-## Testing $H_0\colon\beta_j=0$ (OLS Significance) {.smaller}
+## Testing $H_0\colon\beta_j=0$ (Parametric Significance) {.smaller}
 
 A simple $t$-test is used to test $H_0\colon \beta_j=0$
 
@@ -357,7 +357,7 @@ ghat.ols <- lm(lwage ~ female + married + educ + exper + tenure, data=wage1)
 summary(ghat.ols)
 ```
 
-## Testing $H_0\colon\beta_j(x)=0$ (Significance)
+## Testing $H_0\colon\beta_j(x)=0$ (Kernel Significance)
 
 - The null and alternative hypotheses are
 \begin{align*}
@@ -378,7 +378,7 @@ summary(ghat.ols)
 
 - A bootstrap procedure provides the null distribution (@RACINE:1997, @RACINE_HART_LI:2006)
 
-## Testing $H_0\colon\beta_j(x)=0$ (Significance) {.smaller}
+## Testing $H_0\colon\beta_j(x)=0$ (Kernel Significance) {.smaller}
 
 A bootstrap $\lambda$-test is used to test $H_0\colon \beta_j(x)=0\,\forall\, x$ (a.e.)
 

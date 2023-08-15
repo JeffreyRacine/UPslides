@@ -1560,8 +1560,8 @@ y=\hat g(x)+\hat\epsilon
 
 </div>
 <img data-src="index_files/figure-revealjs/wage1gradientplot-1.png" width="960" class="r-stretch quarto-figure-center"></section>
-<section id="testing-h_0colonbeta_j0-ols-significance" class="slide level2 smaller center">
-<h2>Testing <span class="math inline">\(H_0\colon\beta_j=0\)</span> (OLS Significance)</h2>
+<section id="testing-h_0colonbeta_j0-parametric-significance" class="slide level2 smaller center">
+<h2>Testing <span class="math inline">\(H_0\colon\beta_j=0\)</span> (Parametric Significance)</h2>
 <p>A simple <span class="math inline">\(t\)</span>-test is used to test <span class="math inline">\(H_0\colon \beta_j=0\)</span></p>
 <div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/wage1sigtestols_2b371712bff225ce6326e6bdf1d0d42e">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>ghat.ols <span class="ot">&lt;-</span> <span class="fu">lm</span>(lwage <span class="sc">~</span> female <span class="sc">+</span> married <span class="sc">+</span> educ <span class="sc">+</span> exper <span class="sc">+</span> tenure, <span class="at">data=</span>wage1)</span>
@@ -1591,8 +1591,8 @@ y=\hat g(x)+\hat\epsilon
 <span id="cb13-25"><a href="#cb13-25"></a><span class="do">## F-statistic: 70.38 on 5 and 520 DF,  p-value: &lt; 2.2e-16</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="testing-h_0colonbeta_jx0-significance" class="slide level2 center">
-<h2>Testing <span class="math inline">\(H_0\colon\beta_j(x)=0\)</span> (Significance)</h2>
+<section id="testing-h_0colonbeta_jx0-kernel-significance" class="slide level2 center">
+<h2>Testing <span class="math inline">\(H_0\colon\beta_j(x)=0\)</span> (Kernel Significance)</h2>
 <ul>
 <li class="fragment"><p>The null and alternative hypotheses are <span class="math display">\[\begin{align*}
 H_0\colon\quad&amp; \beta_j(x) = 0\hbox{ for all } x \hbox{ (a.e.)}\\
@@ -1610,8 +1610,8 @@ with + measure}
 <li class="fragment"><p>A bootstrap procedure provides the null distribution (<span class="citation" data-cites="RACINE:1997">Racine (<a href="#/references-scrollable" role="doc-biblioref" onclick="">1997</a>)</span>, <span class="citation" data-cites="RACINE_HART_LI:2006">Racine, Hart, and Li (<a href="#/references-scrollable" role="doc-biblioref" onclick="">2006</a>)</span>)</p></li>
 </ul>
 </section>
-<section id="testing-h_0colonbeta_jx0-significance-1" class="slide level2 smaller center">
-<h2>Testing <span class="math inline">\(H_0\colon\beta_j(x)=0\)</span> (Significance)</h2>
+<section id="testing-h_0colonbeta_jx0-kernel-significance-1" class="slide level2 smaller center">
+<h2>Testing <span class="math inline">\(H_0\colon\beta_j(x)=0\)</span> (Kernel Significance)</h2>
 <p>A bootstrap <span class="math inline">\(\lambda\)</span>-test is used to test <span class="math inline">\(H_0\colon \beta_j(x)=0\,\forall\, x\)</span> (a.e.)</p>
 <div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/wage1sigtestnp_4dd25c88bee0cc79d2f521bc04f32b29">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">npsigtest</span>(ghat)</span>
