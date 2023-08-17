@@ -1,0 +1,378 @@
+# Assessing Parametric, Semiparametric, and Nonparametric Models
+
+## Assessing Model Performance
+
+- Let's compare the parametric, semiparametric, and nonparametric approaches on two real-world datasets
+
+- Comparing in-sample performance ("Apparent") is not convincing (overfitting, etc.)
+
+- Let's split the data into two sets, a "training" set and independent "evaluation" set, the fit a set of models on the training set and asses how the predictions do using the independent evaluation data
+
+- Of course, one split of the data might favour one model, another split some other model, so we repeat this process a large number of times, compute some measure of average performance over all splits, and test whether the average performance for one model is *significantly* different from the average performance for some other using the "Revealed Performance" test [@RACINE_PARMETER:2012]
+
+## Assessing Model Performance - Binary $Y$, Birth Weight Data
+
+```{r rpbirthwt,echo=TRUE}
+require(np)
+require(MASS)
+## This code chunk illustrates the RP test (Revealed Performance)
+## detailed in Racine and Parmeter (2012)
+require(np)
+options(np.messages=FALSE)
+set.seed(42)
+## This function takes a confusion matrix and formats it correctly if
+## it is unbalanced and returns the CCR as well.
+CM <- function(cm) {
+  factor.values.eval <- colnames(cm)
+  CM <- matrix(0,nrow(cm),nrow(cm))
+  rownames(CM) <- rownames(cm)
+  colnames(CM) <- rownames(cm)
+  for(i in 1:ncol(cm)) CM[,(1:nrow(cm))[rownames(cm)==factor.values.eval[i]]] <- cm[,i]
+  return(list(CM=CM,CCR=sum(diag(CM))/sum(CM)))
+}
+## Load the birthwt data
+library(MASS)
+data(birthwt)
+## Create a data frame that has up to 4th order polynomials. We will
+## use the BIC-optimal parametric model that will allow for
+## interactions and some nonlinearity.
+bwt <- with(birthwt,data.frame(low=factor(low),
+                               race=factor(race),
+                               smoke=factor(smoke),
+                               ht=factor(ht),
+                               ui=factor(ui),
+                               ftv=ordered(ftv),
+                               age=age,
+                               agesq=age**2,
+                               agecu=age**3,
+                               agequ=age**4,
+                               lwt=lwt,
+                               lwtsq=lwt**2,
+                               lwtcu=lwt**3,
+                               lwtqu=lwt**4))
+## Set the size of the evaluation data (n.eval) and the training data
+## (n.train), number of multistarts for bandwidth selection (nmulti)
+## and number of train/eval splits (M)
+n.eval <- 10
+n <- nrow(bwt)
+n.train <- n-n.eval
+M <- 1000
+## Create storage vectors
+ccr.linear <- numeric(M)
+ccr.linint <- numeric(M)
+ccr.BIC <- numeric(M)
+ccr.kernel <- numeric(M)
+ccr.index <- numeric(M)
+## Copy the full sample into the object train
+train <- bwt
+## Fit the parametric Logit model for the full sample.
+##
+## Linear 
+logit.linear <- glm(low~
+                    smoke+
+                    race+
+                    ht+
+                    ui+
+                    age+
+                    lwt+
+                    ftv,
+                    family=binomial(link=logit),
+                    data=train)
+## Linear Logit model with interactions
+logit.linint <- glm(low~
+                    (smoke+
+                     race+
+                     ht+
+                     ui+
+                     age+
+                     lwt+
+                     ftv)^2,
+                    family=binomial(link=logit),
+                    data=train)
+## BIC-optimal Logit model
+logit.BIC <- glm(low ~ .,
+                 family = binomial(link=logit),
+                 data = train)
+logit.BIC <- stepAIC(logit.BIC, ~ .^3,
+                     trace=FALSE,
+                     k=log(nrow(birthwt)))
+## Klein spady estimator
+model.index <- npindex(low~smoke+
+                       race+
+                       ht+
+                       ui+
+                       ftv+
+                       age+
+                       lwt,
+                       method="kleinspady",
+                       data=train)
+## Get the bandwidths for the nonparametric model for the full sample.
+bw <- npcdensbw(low~
+                smoke+
+                race+
+                ht+
+                ui+
+                age+
+                lwt+
+                ftv,
+                data=train)
+## Apparent (in-sample) performance
+ccr.app.linear <- with(train,CM(table(low,ifelse(predict(update(logit.linear),
+                                                 type="response",newdata=train)>0.5,1,0))))$CCR
+ccr.app.linint <- with(train,CM(table(low,ifelse(predict(update(logit.linint),
+                                                 type="response",newdata=train)>0.5,1,0))))$CCR
+ccr.app.BIC <- with(train,CM(table(low,ifelse(predict(update(logit.BIC),
+                                              type="response",newdata=train)>0.5,1,0))))$CCR
+ccr.app.index <- with(train,CM(table(low,ifelse(fitted(model.index)>0.5, 1, 0))))$CCR
+ccr.app.kernel <- npconmode(bws=bw,newdata=train)$CCR.overall
+## Conduct the M train/eval splits
+for(m in 1:M) {
+    ## Shuffle the data into independent training and evaluation samples.
+    ii <- sample(1:n,replace=FALSE)
+    train <- bwt[ii[1:n.train],]
+    ## glm() can't deal with < all ftv cases
+    while(length(unique(train$ftv))<length(unique(bwt$ftv))) {
+        ii <- sample(1:n,replace=FALSE)
+        train <- bwt[ii[1:n.train],]
+    }
+    eval <- bwt[ii[(n.train+1):n],]
+    ## Extract the correct classification ratios for the independent
+    ## evaluation data where we know the outcomes (update() refits the
+    ## Logit model on train, the nonparametric model will
+    ## automatically update taking train from the environment when it
+    ## is called by predict()).
+    ccr.linear[m] <- with(eval,CM(table(low,ifelse(predict(update(logit.linear),
+                                                   type="response",newdata=eval)>0.5,1,0))))$CCR
+    ccr.linint[m] <- with(eval,CM(table(low,ifelse(predict(update(logit.linint),
+                                                   type="response",newdata=eval)>0.5,1,0))))$CCR
+    ccr.BIC[m] <- with(eval,CM(table(low,ifelse(predict(update(logit.BIC),
+                                                type="response",newdata=eval)>0.5,1,0))))$CCR
+    ccr.index[m] <- with(eval,CM(table(low,ifelse(predict(model.index,newdata=eval)>0.5,1,0))))$CCR
+    ccr.kernel[m] <- npconmode(bws=bw,newdata=eval)$CCR.overall
+}
+## Conduct a paired t-test that the mean expected true CCR for each model 
+## is equal versus the alternative that the kernel-based model has a significantly larger
+## expected true CCR than the BIC-optimal Logit model.
+p.linear <- t.test(ccr.kernel,ccr.linear,alternative="greater",paired=TRUE)$p.value
+p.linint <- t.test(ccr.kernel,ccr.linint,alternative="greater",paired=TRUE)$p.value
+p.BIC <- t.test(ccr.kernel,ccr.BIC,alternative="greater",paired=TRUE)$p.value
+p.index <- t.test(ccr.kernel,ccr.index,alternative="greater",paired=TRUE)$p.value
+p <- c(p.linear,p.linint,p.BIC,p.index,NA)
+## Apparent performance
+apparent <- c(ccr.app.linear,ccr.app.linint,ccr.app.BIC,ccr.app.index,ccr.app.kernel)
+## Expected true performance
+true <- c(mean(ccr.linear),mean(ccr.linint),mean(ccr.BIC),mean(ccr.index),mean(ccr.kernel))
+```
+
+## Assessing Model Performance - Binary $Y$, Birth Weight Data {.smaller}
+
+```{r rpbirthwttab,echo=FALSE}
+foo <- data.frame(apparent,true,rank(-true),p)
+rownames(foo) <- c("Par-Linear","Par-Linear-Int","Par-BIC","Semipar-KS","Nonpar")
+colnames(foo) <- c("Apparent","Expected","Rank","$P$-value")
+knitr::kable(foo,
+             caption="Apparent versus expected true model performance (higher values are preferred) and $P$-values from a test for equality of expected true performance. The cases considered are the kernel versus linear models, kernel versus linear with interaction models, kernel versus BIC-optimal models, and kernel versus the Klein and Spady models. Rejection of the null implies that the kernel-based model has significantly higher mean CCR on independent data.",
+             digits=3,
+             escape=FALSE)
+```
+
+## Assessing Model Performance - Continuous $Y$, Wage Data
+
+```{r rpwage1,echo=TRUE}
+## This code chunk illustrates the RP test (Revealed Performance)
+## detailed in Racine and Parmeter (2012)
+require(crs)
+require(np)
+data(wage1)
+options(crs.messages=FALSE,np.messages=FALSE)
+set.seed(42)
+## Set the size of the evaluation data (n.eval) and the training data
+## (n.train), and number of train/eval splits (M).
+n.eval <- 10
+n <- nrow(wage1)
+n.train <- n-n.eval
+M <- 1000
+## Create storage vectors.
+aspe.linear <- numeric(M)
+aspe.quadint <- numeric(M)
+aspe.mw <- numeric(M)
+aspe.vc <- numeric(M)
+aspe.pl <- numeric(M)
+aspe.si <- numeric(M)
+aspe.lc <- numeric(M)
+aspe.ll <- numeric(M)
+aspe.glp <- numeric(M)
+## Copy the full sample into the object train.
+train <- wage1
+## Fit the parametric, semiparametric, and nonparametric models for 
+## the full sample.
+##
+## Linear 
+lm.linear <- lm(lwage~female+
+                married+
+                educ+
+                exper+
+                tenure,
+                data=train)
+## Linear with interactions and quadratic in experience (common
+## specification).
+lm.quadint <- lm(lwage~(female+
+                        married+
+                        educ+
+                        exper+
+                        I(exper^2)+
+                        tenure)^2,
+                data=train)
+## Murphy-Welch quartic specification                
+lm.mw <- lm(lwage~female+
+            married+
+            educ+
+            exper+
+            I(exper^2)+
+            I(exper^3)+
+            I(exper^4)+
+            tenure,
+            data=train)
+## Varying coefficient
+model.vc <- npscoef(lwage~educ+
+                    tenure+
+                    exper+
+                    expersq|female+married,
+                    data=train)
+## Partially linear
+model.pl <- npplreg(lwage~female+
+                    married+
+                    educ+
+                    tenure|exper,
+                    data=train)
+## Single-index (Ichimura)
+model.si <- npindex(lwage~female+
+                    married+
+                    educ+
+                    tenure+
+                    exper+
+                    expersq,
+                    method="ichimura",
+                    data=train)
+## Local constant
+bw.lc <- npregbw(lwage~female+
+                 married+
+                 educ+
+                 exper+
+                 tenure,
+                 regtype="lc",
+                 bwmethod="cv.aic",
+                 data=train)
+model.lc <- npreg(bws=bw.lc)
+## Local linear
+bw.ll <- npregbw(lwage~female+
+                 married+
+                 educ+
+                 exper+
+                 tenure,
+                 regtype="ll",
+                 bwmethod="cv.aic",
+                 data=train)
+model.ll <- npreg(bws=bw.ll)
+## Generalized local polynomial
+ghat <- npglpreg(lwage~female+
+                 married+
+                 educ+
+                 exper+
+                 tenure,
+                 cv.func="cv.aic",
+                 data=train)
+model.glp <- npglpreg(ghat$formula,cv="none",degree=ghat$degree,bws=ghat$bws,data=train)
+## Apparent (in-sample) performance
+aspe.app.linear <- with(train,mean((lwage-predict(lm.linear,newdata=train))^2))
+aspe.app.quadint <- with(train,mean((lwage-predict(lm.quadint,newdata=train))^2))
+aspe.app.mw <- with(train,mean((lwage-predict(lm.mw,newdata=train))^2))
+aspe.app.vc <- with(train,mean((lwage-predict(model.vc,newdata=train))^2))
+aspe.app.pl <- with(train,mean((lwage-predict(model.pl,newdata=train))^2))
+aspe.app.si <- with(train,mean((lwage-predict(model.si,newdata=train))^2))
+aspe.app.lc <- with(train,mean((lwage-predict(model.lc,newdata=train))^2))
+aspe.app.ll <- with(train,mean((lwage-predict(model.ll,newdata=train))^2))
+aspe.app.glp <- with(train,mean((lwage-predict(model.glp,newdata=train))^2))
+## Conduct the M train/eval splits
+for(m in 1:M) {
+    ## We set the seed here to guarantee that the shuffles generated
+    ## here and those in the Practitioner's Corner in Chapter 6 are
+    ## identical.
+    set.seed(m)
+    ## Shuffle the data into independent training and evaluation
+    ## samples.
+    ii <- sample(1:n,replace=FALSE)
+    train <- wage1[ii[1:n.train],]
+    eval <- wage1[ii[(n.train+1):n],]
+    ## Extract the APSEs for the independent evaluation data where we
+    ## know the outcomes (update() refits the lm model on train).
+    aspe.linear[m] <- with(eval,mean((lwage-predict(update(lm.linear),newdata=eval))^2))
+    aspe.quadint[m] <- with(eval,mean((lwage-predict(update(lm.quadint),newdata=eval))^2))
+    aspe.mw[m] <- with(eval,mean((lwage-predict(update(lm.mw),newdata=eval))^2))
+    ## Calling the semi- and nonparametric functions with the existing
+    ## bandwidth object re-estimates the model on the updated training data.
+    model.vc.boot <- npscoef(bws=model.vc$bws)
+    aspe.vc[m] <- with(eval,mean((lwage-predict(model.vc.boot,newdata=eval))^2))
+    model.pl.boot <- npplreg(bws=model.pl$bw)
+    aspe.pl[m] <- with(eval,mean((lwage-predict(model.pl.boot,newdata=eval))^2))
+    model.si.boot <- npindex(bws=model.si$bws)
+    aspe.si[m] <- with(eval,mean((lwage-predict(model.si.boot,newdata=eval))^2))
+    model.lc <- npreg(bws=bw.lc)        
+    aspe.lc[m] <- with(eval,mean((lwage-predict(model.lc,newdata=eval))^2))
+    model.ll <- npreg(bws=bw.ll)
+    aspe.ll[m] <- with(eval,mean((lwage-predict(model.ll,newdata=eval))^2))
+    model.glp <- npglpreg(ghat$formula,cv="none",degree=ghat$degree,bws=ghat$bws,data=train)
+    aspe.glp[m] <- with(eval,mean((lwage-predict(model.glp,newdata=eval))^2))
+}
+## Conduct a paired t-test that the mean expected true ASPE for each
+## model is equal versus the alternative that the kernel has a
+## significantly lower expected true ASPE than the MW-optimal lm
+## model.
+## LC versus parametric and semiparametric.
+p.linear <- t.test(aspe.lc,aspe.linear,alternative="less",paired=TRUE)$p.value
+p.quadint <- t.test(aspe.lc,aspe.quadint,alternative="less",paired=TRUE)$p.value
+p.mw <- t.test(aspe.lc,aspe.mw,alternative="less",paired=TRUE)$p.value
+p.vc <- t.test(aspe.lc,aspe.vc,alternative="less",paired=TRUE)$p.value
+p.pl <- t.test(aspe.lc,aspe.pl,alternative="less",paired=TRUE)$p.value
+p.si <- t.test(aspe.lc,aspe.si,alternative="less",paired=TRUE)$p.value
+p.lc <- c(p.linear,p.quadint,p.mw,p.vc,p.pl,p.si,NA,NA,NA)
+## LL versus parametric and semiparametric.
+p.linear <- t.test(aspe.ll,aspe.linear,alternative="less",paired=TRUE)$p.value
+p.quadint <- t.test(aspe.ll,aspe.quadint,alternative="less",paired=TRUE)$p.value
+p.mw <- t.test(aspe.ll,aspe.mw,alternative="less",paired=TRUE)$p.value
+p.vc <- t.test(aspe.ll,aspe.vc,alternative="less",paired=TRUE)$p.value
+p.pl <- t.test(aspe.ll,aspe.pl,alternative="less",paired=TRUE)$p.value
+p.si <- t.test(aspe.ll,aspe.si,alternative="less",paired=TRUE)$p.value
+p.ll <- c(p.linear,p.quadint,p.mw,p.vc,p.pl,p.si,NA,NA,NA)
+## GLP versus parametric and semiparametric.
+p.linear <- t.test(aspe.glp,aspe.linear,alternative="less",paired=TRUE)$p.value
+p.quadint <- t.test(aspe.glp,aspe.quadint,alternative="less",paired=TRUE)$p.value
+p.mw <- t.test(aspe.glp,aspe.mw,alternative="less",paired=TRUE)$p.value
+p.vc <- t.test(aspe.glp,aspe.vc,alternative="less",paired=TRUE)$p.value
+p.pl <- t.test(aspe.glp,aspe.pl,alternative="less",paired=TRUE)$p.value
+p.si <- t.test(aspe.glp,aspe.si,alternative="less",paired=TRUE)$p.value
+p.glp <- c(p.linear,p.quadint,p.mw,p.vc,p.pl,p.si,NA,NA,NA)
+## Apparent performance.
+apparent <- c(aspe.app.linear,aspe.app.quadint,aspe.app.mw,
+              aspe.app.vc,aspe.app.pl,aspe.app.si,
+              aspe.app.glp,aspe.app.ll,aspe.app.lc)
+## Expected true performance.
+true <- c(mean(aspe.linear),mean(aspe.quadint),mean(aspe.mw),
+          mean(aspe.vc),mean(aspe.pl),mean(aspe.si),
+          mean(aspe.glp),mean(aspe.ll),mean(aspe.lc))
+```
+
+## Assessing Model Performance - Continuous $Y$, Wage Data {.smaller}
+
+```{r rpwage1tab,echo=FALSE}
+foo <- data.frame(apparent,true,rank(true),p.glp,p.ll,p.lc)
+rownames(foo) <- c("Par-Linear","Par-Quad-Int","Par-Murphy-Welch",
+                   "Semipar-VC","Semipar-PL","Semipar-SI",
+                   "Nonpar-GLP","Nonpar-LL","Nonpar-LC")
+colnames(foo) <- c("Apparent","Expected","Rank",
+                   "$P$-GLP","$P$-LL","$P$-LC")
+knitr::kable(foo,
+             caption="Apparent versus expected true model performance (lower values are preferred) and $P$-values from a test for equality of expected true performance for the kernel versus the parametric and semiparametric models (rejection of the null implies the kernel model has significantly lower mean ASPE on independent data).",
+             digits=4,
+             escape=FALSE)
+```

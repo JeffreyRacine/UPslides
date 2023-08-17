@@ -116,6 +116,8 @@ Encourage participants to print/save a PDF copy of the slides as there is no gua
 
 {{< include semipar.qmd >}}
 
+{{< include model_performance.qmd >}}
+
 {{< include quarto.qmd >}}
 
 # References (scrollable)

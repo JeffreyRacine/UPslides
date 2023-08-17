@@ -1941,7 +1941,7 @@ with + measure}
 <span id="cb24-23"><a href="#cb24-23"></a><span class="do">## Multiple R-squared: 0.812</span></span>
 <span id="cb24-24"><a href="#cb24-24"></a><span class="do">## Cross-validation score: 0.84938168</span></span>
 <span id="cb24-25"><a href="#cb24-25"></a><span class="do">## Number of multistarts: 5</span></span>
-<span id="cb24-26"><a href="#cb24-26"></a><span class="do">## Estimation time: 15.3 seconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-26"><a href="#cb24-26"></a><span class="do">## Estimation time: 13.3 seconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="nonparametric-ar-models-10" class="slide level2 center">
@@ -2934,6 +2934,520 @@ c&amp;c&amp;c&amp;\dots&amp; 1
 </ul>
 </section></section>
 <section>
+<section id="assessing-parametric-semiparametric-and-nonparametric-models" class="title-slide slide level1 center">
+<h1>Assessing Parametric, Semiparametric, and Nonparametric Models</h1>
+
+</section>
+<section id="assessing-model-performance" class="slide level2 center">
+<h2>Assessing Model Performance</h2>
+<ul>
+<li class="fragment"><p>Let’s compare the parametric, semiparametric, and nonparametric approaches on two real-world datasets</p></li>
+<li class="fragment"><p>Comparing in-sample performance (“Apparent”) is not convincing (overfitting, etc.)</p></li>
+<li class="fragment"><p>Let’s split the data into two sets, a “training” set and independent “evaluation” set, the fit a set of models on the training set and asses how the predictions do using the independent evaluation data</p></li>
+<li class="fragment"><p>Of course, one split of the data might favour one model, another split some other model, so we repeat this process a large number of times, compute some measure of average performance over all splits, and test whether the average performance for one model is <em>significantly</em> different from the average performance for some other using the “Revealed Performance” test <span class="citation" data-cites="RACINE_PARMETER:2012">(<a href="#/references-scrollable" role="doc-biblioref" onclick="">Racine and Parmeter 2012</a>)</span></p></li>
+</ul>
+</section>
+<section id="assessing-model-performance---binary-y-birth-weight-data" class="slide level2 center">
+<h2>Assessing Model Performance - Binary <span class="math inline">\(Y\)</span>, Birth Weight Data</h2>
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/rpbirthwt_5bb8cab692370ed487fb746fcf4d59b2">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a><span class="fu">require</span>(np)</span>
+<span id="cb38-2"><a href="#cb38-2"></a><span class="fu">require</span>(MASS)</span>
+<span id="cb38-3"><a href="#cb38-3"></a><span class="do">## This code chunk illustrates the RP test (Revealed Performance)</span></span>
+<span id="cb38-4"><a href="#cb38-4"></a><span class="do">## detailed in Racine and Parmeter (2012)</span></span>
+<span id="cb38-5"><a href="#cb38-5"></a><span class="fu">require</span>(np)</span>
+<span id="cb38-6"><a href="#cb38-6"></a><span class="fu">options</span>(<span class="at">np.messages=</span><span class="cn">FALSE</span>)</span>
+<span id="cb38-7"><a href="#cb38-7"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb38-8"><a href="#cb38-8"></a><span class="do">## This function takes a confusion matrix and formats it correctly if</span></span>
+<span id="cb38-9"><a href="#cb38-9"></a><span class="do">## it is unbalanced and returns the CCR as well.</span></span>
+<span id="cb38-10"><a href="#cb38-10"></a>CM <span class="ot">&lt;-</span> <span class="cf">function</span>(cm) {</span>
+<span id="cb38-11"><a href="#cb38-11"></a>  factor.values.eval <span class="ot">&lt;-</span> <span class="fu">colnames</span>(cm)</span>
+<span id="cb38-12"><a href="#cb38-12"></a>  CM <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>,<span class="fu">nrow</span>(cm),<span class="fu">nrow</span>(cm))</span>
+<span id="cb38-13"><a href="#cb38-13"></a>  <span class="fu">rownames</span>(CM) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(cm)</span>
+<span id="cb38-14"><a href="#cb38-14"></a>  <span class="fu">colnames</span>(CM) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(cm)</span>
+<span id="cb38-15"><a href="#cb38-15"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(cm)) CM[,(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(cm))[<span class="fu">rownames</span>(cm)<span class="sc">==</span>factor.values.eval[i]]] <span class="ot">&lt;-</span> cm[,i]</span>
+<span id="cb38-16"><a href="#cb38-16"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">CM=</span>CM,<span class="at">CCR=</span><span class="fu">sum</span>(<span class="fu">diag</span>(CM))<span class="sc">/</span><span class="fu">sum</span>(CM)))</span>
+<span id="cb38-17"><a href="#cb38-17"></a>}</span>
+<span id="cb38-18"><a href="#cb38-18"></a><span class="do">## Load the birthwt data</span></span>
+<span id="cb38-19"><a href="#cb38-19"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb38-20"><a href="#cb38-20"></a><span class="fu">data</span>(birthwt)</span>
+<span id="cb38-21"><a href="#cb38-21"></a><span class="do">## Create a data frame that has up to 4th order polynomials. We will</span></span>
+<span id="cb38-22"><a href="#cb38-22"></a><span class="do">## use the BIC-optimal parametric model that will allow for</span></span>
+<span id="cb38-23"><a href="#cb38-23"></a><span class="do">## interactions and some nonlinearity.</span></span>
+<span id="cb38-24"><a href="#cb38-24"></a>bwt <span class="ot">&lt;-</span> <span class="fu">with</span>(birthwt,<span class="fu">data.frame</span>(<span class="at">low=</span><span class="fu">factor</span>(low),</span>
+<span id="cb38-25"><a href="#cb38-25"></a>                               <span class="at">race=</span><span class="fu">factor</span>(race),</span>
+<span id="cb38-26"><a href="#cb38-26"></a>                               <span class="at">smoke=</span><span class="fu">factor</span>(smoke),</span>
+<span id="cb38-27"><a href="#cb38-27"></a>                               <span class="at">ht=</span><span class="fu">factor</span>(ht),</span>
+<span id="cb38-28"><a href="#cb38-28"></a>                               <span class="at">ui=</span><span class="fu">factor</span>(ui),</span>
+<span id="cb38-29"><a href="#cb38-29"></a>                               <span class="at">ftv=</span><span class="fu">ordered</span>(ftv),</span>
+<span id="cb38-30"><a href="#cb38-30"></a>                               <span class="at">age=</span>age,</span>
+<span id="cb38-31"><a href="#cb38-31"></a>                               <span class="at">agesq=</span>age<span class="sc">**</span><span class="dv">2</span>,</span>
+<span id="cb38-32"><a href="#cb38-32"></a>                               <span class="at">agecu=</span>age<span class="sc">**</span><span class="dv">3</span>,</span>
+<span id="cb38-33"><a href="#cb38-33"></a>                               <span class="at">agequ=</span>age<span class="sc">**</span><span class="dv">4</span>,</span>
+<span id="cb38-34"><a href="#cb38-34"></a>                               <span class="at">lwt=</span>lwt,</span>
+<span id="cb38-35"><a href="#cb38-35"></a>                               <span class="at">lwtsq=</span>lwt<span class="sc">**</span><span class="dv">2</span>,</span>
+<span id="cb38-36"><a href="#cb38-36"></a>                               <span class="at">lwtcu=</span>lwt<span class="sc">**</span><span class="dv">3</span>,</span>
+<span id="cb38-37"><a href="#cb38-37"></a>                               <span class="at">lwtqu=</span>lwt<span class="sc">**</span><span class="dv">4</span>))</span>
+<span id="cb38-38"><a href="#cb38-38"></a><span class="do">## Set the size of the evaluation data (n.eval) and the training data</span></span>
+<span id="cb38-39"><a href="#cb38-39"></a><span class="do">## (n.train), number of multistarts for bandwidth selection (nmulti)</span></span>
+<span id="cb38-40"><a href="#cb38-40"></a><span class="do">## and number of train/eval splits (M)</span></span>
+<span id="cb38-41"><a href="#cb38-41"></a>n.eval <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb38-42"><a href="#cb38-42"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(bwt)</span>
+<span id="cb38-43"><a href="#cb38-43"></a>n.train <span class="ot">&lt;-</span> n<span class="sc">-</span>n.eval</span>
+<span id="cb38-44"><a href="#cb38-44"></a>M <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb38-45"><a href="#cb38-45"></a><span class="do">## Create storage vectors</span></span>
+<span id="cb38-46"><a href="#cb38-46"></a>ccr.linear <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb38-47"><a href="#cb38-47"></a>ccr.linint <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb38-48"><a href="#cb38-48"></a>ccr.BIC <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb38-49"><a href="#cb38-49"></a>ccr.kernel <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb38-50"><a href="#cb38-50"></a>ccr.index <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb38-51"><a href="#cb38-51"></a><span class="do">## Copy the full sample into the object train</span></span>
+<span id="cb38-52"><a href="#cb38-52"></a>train <span class="ot">&lt;-</span> bwt</span>
+<span id="cb38-53"><a href="#cb38-53"></a><span class="do">## Fit the parametric Logit model for the full sample.</span></span>
+<span id="cb38-54"><a href="#cb38-54"></a><span class="do">##</span></span>
+<span id="cb38-55"><a href="#cb38-55"></a><span class="do">## Linear </span></span>
+<span id="cb38-56"><a href="#cb38-56"></a>logit.linear <span class="ot">&lt;-</span> <span class="fu">glm</span>(low<span class="sc">~</span></span>
+<span id="cb38-57"><a href="#cb38-57"></a>                    smoke<span class="sc">+</span></span>
+<span id="cb38-58"><a href="#cb38-58"></a>                    race<span class="sc">+</span></span>
+<span id="cb38-59"><a href="#cb38-59"></a>                    ht<span class="sc">+</span></span>
+<span id="cb38-60"><a href="#cb38-60"></a>                    ui<span class="sc">+</span></span>
+<span id="cb38-61"><a href="#cb38-61"></a>                    age<span class="sc">+</span></span>
+<span id="cb38-62"><a href="#cb38-62"></a>                    lwt<span class="sc">+</span></span>
+<span id="cb38-63"><a href="#cb38-63"></a>                    ftv,</span>
+<span id="cb38-64"><a href="#cb38-64"></a>                    <span class="at">family=</span><span class="fu">binomial</span>(<span class="at">link=</span>logit),</span>
+<span id="cb38-65"><a href="#cb38-65"></a>                    <span class="at">data=</span>train)</span>
+<span id="cb38-66"><a href="#cb38-66"></a><span class="do">## Linear Logit model with interactions</span></span>
+<span id="cb38-67"><a href="#cb38-67"></a>logit.linint <span class="ot">&lt;-</span> <span class="fu">glm</span>(low<span class="sc">~</span></span>
+<span id="cb38-68"><a href="#cb38-68"></a>                    (smoke<span class="sc">+</span></span>
+<span id="cb38-69"><a href="#cb38-69"></a>                     race<span class="sc">+</span></span>
+<span id="cb38-70"><a href="#cb38-70"></a>                     ht<span class="sc">+</span></span>
+<span id="cb38-71"><a href="#cb38-71"></a>                     ui<span class="sc">+</span></span>
+<span id="cb38-72"><a href="#cb38-72"></a>                     age<span class="sc">+</span></span>
+<span id="cb38-73"><a href="#cb38-73"></a>                     lwt<span class="sc">+</span></span>
+<span id="cb38-74"><a href="#cb38-74"></a>                     ftv)<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb38-75"><a href="#cb38-75"></a>                    <span class="at">family=</span><span class="fu">binomial</span>(<span class="at">link=</span>logit),</span>
+<span id="cb38-76"><a href="#cb38-76"></a>                    <span class="at">data=</span>train)</span>
+<span id="cb38-77"><a href="#cb38-77"></a><span class="do">## BIC-optimal Logit model</span></span>
+<span id="cb38-78"><a href="#cb38-78"></a>logit.BIC <span class="ot">&lt;-</span> <span class="fu">glm</span>(low <span class="sc">~</span> .,</span>
+<span id="cb38-79"><a href="#cb38-79"></a>                 <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link=</span>logit),</span>
+<span id="cb38-80"><a href="#cb38-80"></a>                 <span class="at">data =</span> train)</span>
+<span id="cb38-81"><a href="#cb38-81"></a>logit.BIC <span class="ot">&lt;-</span> <span class="fu">stepAIC</span>(logit.BIC, <span class="sc">~</span> .<span class="sc">^</span><span class="dv">3</span>,</span>
+<span id="cb38-82"><a href="#cb38-82"></a>                     <span class="at">trace=</span><span class="cn">FALSE</span>,</span>
+<span id="cb38-83"><a href="#cb38-83"></a>                     <span class="at">k=</span><span class="fu">log</span>(<span class="fu">nrow</span>(birthwt)))</span>
+<span id="cb38-84"><a href="#cb38-84"></a><span class="do">## Klein spady estimator</span></span>
+<span id="cb38-85"><a href="#cb38-85"></a>model.index <span class="ot">&lt;-</span> <span class="fu">npindex</span>(low<span class="sc">~</span>smoke<span class="sc">+</span></span>
+<span id="cb38-86"><a href="#cb38-86"></a>                       race<span class="sc">+</span></span>
+<span id="cb38-87"><a href="#cb38-87"></a>                       ht<span class="sc">+</span></span>
+<span id="cb38-88"><a href="#cb38-88"></a>                       ui<span class="sc">+</span></span>
+<span id="cb38-89"><a href="#cb38-89"></a>                       ftv<span class="sc">+</span></span>
+<span id="cb38-90"><a href="#cb38-90"></a>                       age<span class="sc">+</span></span>
+<span id="cb38-91"><a href="#cb38-91"></a>                       lwt,</span>
+<span id="cb38-92"><a href="#cb38-92"></a>                       <span class="at">method=</span><span class="st">"kleinspady"</span>,</span>
+<span id="cb38-93"><a href="#cb38-93"></a>                       <span class="at">data=</span>train)</span>
+<span id="cb38-94"><a href="#cb38-94"></a><span class="do">## Get the bandwidths for the nonparametric model for the full sample.</span></span>
+<span id="cb38-95"><a href="#cb38-95"></a>bw <span class="ot">&lt;-</span> <span class="fu">npcdensbw</span>(low<span class="sc">~</span></span>
+<span id="cb38-96"><a href="#cb38-96"></a>                smoke<span class="sc">+</span></span>
+<span id="cb38-97"><a href="#cb38-97"></a>                race<span class="sc">+</span></span>
+<span id="cb38-98"><a href="#cb38-98"></a>                ht<span class="sc">+</span></span>
+<span id="cb38-99"><a href="#cb38-99"></a>                ui<span class="sc">+</span></span>
+<span id="cb38-100"><a href="#cb38-100"></a>                age<span class="sc">+</span></span>
+<span id="cb38-101"><a href="#cb38-101"></a>                lwt<span class="sc">+</span></span>
+<span id="cb38-102"><a href="#cb38-102"></a>                ftv,</span>
+<span id="cb38-103"><a href="#cb38-103"></a>                <span class="at">data=</span>train)</span>
+<span id="cb38-104"><a href="#cb38-104"></a><span class="do">## Apparent (in-sample) performance</span></span>
+<span id="cb38-105"><a href="#cb38-105"></a>ccr.app.linear <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">CM</span>(<span class="fu">table</span>(low,<span class="fu">ifelse</span>(<span class="fu">predict</span>(<span class="fu">update</span>(logit.linear),</span>
+<span id="cb38-106"><a href="#cb38-106"></a>                                                 <span class="at">type=</span><span class="st">"response"</span>,<span class="at">newdata=</span>train)<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>))))<span class="sc">$</span>CCR</span>
+<span id="cb38-107"><a href="#cb38-107"></a>ccr.app.linint <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">CM</span>(<span class="fu">table</span>(low,<span class="fu">ifelse</span>(<span class="fu">predict</span>(<span class="fu">update</span>(logit.linint),</span>
+<span id="cb38-108"><a href="#cb38-108"></a>                                                 <span class="at">type=</span><span class="st">"response"</span>,<span class="at">newdata=</span>train)<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>))))<span class="sc">$</span>CCR</span>
+<span id="cb38-109"><a href="#cb38-109"></a>ccr.app.BIC <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">CM</span>(<span class="fu">table</span>(low,<span class="fu">ifelse</span>(<span class="fu">predict</span>(<span class="fu">update</span>(logit.BIC),</span>
+<span id="cb38-110"><a href="#cb38-110"></a>                                              <span class="at">type=</span><span class="st">"response"</span>,<span class="at">newdata=</span>train)<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>))))<span class="sc">$</span>CCR</span>
+<span id="cb38-111"><a href="#cb38-111"></a>ccr.app.index <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">CM</span>(<span class="fu">table</span>(low,<span class="fu">ifelse</span>(<span class="fu">fitted</span>(model.index)<span class="sc">&gt;</span><span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">0</span>))))<span class="sc">$</span>CCR</span>
+<span id="cb38-112"><a href="#cb38-112"></a>ccr.app.kernel <span class="ot">&lt;-</span> <span class="fu">npconmode</span>(<span class="at">bws=</span>bw,<span class="at">newdata=</span>train)<span class="sc">$</span>CCR.overall</span>
+<span id="cb38-113"><a href="#cb38-113"></a><span class="do">## Conduct the M train/eval splits</span></span>
+<span id="cb38-114"><a href="#cb38-114"></a><span class="cf">for</span>(m <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>M) {</span>
+<span id="cb38-115"><a href="#cb38-115"></a>    <span class="do">## Shuffle the data into independent training and evaluation samples.</span></span>
+<span id="cb38-116"><a href="#cb38-116"></a>    ii <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n,<span class="at">replace=</span><span class="cn">FALSE</span>)</span>
+<span id="cb38-117"><a href="#cb38-117"></a>    train <span class="ot">&lt;-</span> bwt[ii[<span class="dv">1</span><span class="sc">:</span>n.train],]</span>
+<span id="cb38-118"><a href="#cb38-118"></a>    <span class="do">## glm() can't deal with &lt; all ftv cases</span></span>
+<span id="cb38-119"><a href="#cb38-119"></a>    <span class="cf">while</span>(<span class="fu">length</span>(<span class="fu">unique</span>(train<span class="sc">$</span>ftv))<span class="sc">&lt;</span><span class="fu">length</span>(<span class="fu">unique</span>(bwt<span class="sc">$</span>ftv))) {</span>
+<span id="cb38-120"><a href="#cb38-120"></a>        ii <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n,<span class="at">replace=</span><span class="cn">FALSE</span>)</span>
+<span id="cb38-121"><a href="#cb38-121"></a>        train <span class="ot">&lt;-</span> bwt[ii[<span class="dv">1</span><span class="sc">:</span>n.train],]</span>
+<span id="cb38-122"><a href="#cb38-122"></a>    }</span>
+<span id="cb38-123"><a href="#cb38-123"></a>    eval <span class="ot">&lt;-</span> bwt[ii[(n.train<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>n],]</span>
+<span id="cb38-124"><a href="#cb38-124"></a>    <span class="do">## Extract the correct classification ratios for the independent</span></span>
+<span id="cb38-125"><a href="#cb38-125"></a>    <span class="do">## evaluation data where we know the outcomes (update() refits the</span></span>
+<span id="cb38-126"><a href="#cb38-126"></a>    <span class="do">## Logit model on train, the nonparametric model will</span></span>
+<span id="cb38-127"><a href="#cb38-127"></a>    <span class="do">## automatically update taking train from the environment when it</span></span>
+<span id="cb38-128"><a href="#cb38-128"></a>    <span class="do">## is called by predict()).</span></span>
+<span id="cb38-129"><a href="#cb38-129"></a>    ccr.linear[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">CM</span>(<span class="fu">table</span>(low,<span class="fu">ifelse</span>(<span class="fu">predict</span>(<span class="fu">update</span>(logit.linear),</span>
+<span id="cb38-130"><a href="#cb38-130"></a>                                                   <span class="at">type=</span><span class="st">"response"</span>,<span class="at">newdata=</span>eval)<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>))))<span class="sc">$</span>CCR</span>
+<span id="cb38-131"><a href="#cb38-131"></a>    ccr.linint[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">CM</span>(<span class="fu">table</span>(low,<span class="fu">ifelse</span>(<span class="fu">predict</span>(<span class="fu">update</span>(logit.linint),</span>
+<span id="cb38-132"><a href="#cb38-132"></a>                                                   <span class="at">type=</span><span class="st">"response"</span>,<span class="at">newdata=</span>eval)<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>))))<span class="sc">$</span>CCR</span>
+<span id="cb38-133"><a href="#cb38-133"></a>    ccr.BIC[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">CM</span>(<span class="fu">table</span>(low,<span class="fu">ifelse</span>(<span class="fu">predict</span>(<span class="fu">update</span>(logit.BIC),</span>
+<span id="cb38-134"><a href="#cb38-134"></a>                                                <span class="at">type=</span><span class="st">"response"</span>,<span class="at">newdata=</span>eval)<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>))))<span class="sc">$</span>CCR</span>
+<span id="cb38-135"><a href="#cb38-135"></a>    ccr.index[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">CM</span>(<span class="fu">table</span>(low,<span class="fu">ifelse</span>(<span class="fu">predict</span>(model.index,<span class="at">newdata=</span>eval)<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>))))<span class="sc">$</span>CCR</span>
+<span id="cb38-136"><a href="#cb38-136"></a>    ccr.kernel[m] <span class="ot">&lt;-</span> <span class="fu">npconmode</span>(<span class="at">bws=</span>bw,<span class="at">newdata=</span>eval)<span class="sc">$</span>CCR.overall</span>
+<span id="cb38-137"><a href="#cb38-137"></a>}</span>
+<span id="cb38-138"><a href="#cb38-138"></a><span class="do">## Conduct a paired t-test that the mean expected true CCR for each model </span></span>
+<span id="cb38-139"><a href="#cb38-139"></a><span class="do">## is equal versus the alternative that the kernel-based model has a significantly larger</span></span>
+<span id="cb38-140"><a href="#cb38-140"></a><span class="do">## expected true CCR than the BIC-optimal Logit model.</span></span>
+<span id="cb38-141"><a href="#cb38-141"></a>p.linear <span class="ot">&lt;-</span> <span class="fu">t.test</span>(ccr.kernel,ccr.linear,<span class="at">alternative=</span><span class="st">"greater"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb38-142"><a href="#cb38-142"></a>p.linint <span class="ot">&lt;-</span> <span class="fu">t.test</span>(ccr.kernel,ccr.linint,<span class="at">alternative=</span><span class="st">"greater"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb38-143"><a href="#cb38-143"></a>p.BIC <span class="ot">&lt;-</span> <span class="fu">t.test</span>(ccr.kernel,ccr.BIC,<span class="at">alternative=</span><span class="st">"greater"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb38-144"><a href="#cb38-144"></a>p.index <span class="ot">&lt;-</span> <span class="fu">t.test</span>(ccr.kernel,ccr.index,<span class="at">alternative=</span><span class="st">"greater"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb38-145"><a href="#cb38-145"></a>p <span class="ot">&lt;-</span> <span class="fu">c</span>(p.linear,p.linint,p.BIC,p.index,<span class="cn">NA</span>)</span>
+<span id="cb38-146"><a href="#cb38-146"></a><span class="do">## Apparent performance</span></span>
+<span id="cb38-147"><a href="#cb38-147"></a>apparent <span class="ot">&lt;-</span> <span class="fu">c</span>(ccr.app.linear,ccr.app.linint,ccr.app.BIC,ccr.app.index,ccr.app.kernel)</span>
+<span id="cb38-148"><a href="#cb38-148"></a><span class="do">## Expected true performance</span></span>
+<span id="cb38-149"><a href="#cb38-149"></a>true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">mean</span>(ccr.linear),<span class="fu">mean</span>(ccr.linint),<span class="fu">mean</span>(ccr.BIC),<span class="fu">mean</span>(ccr.index),<span class="fu">mean</span>(ccr.kernel))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="assessing-model-performance---binary-y-birth-weight-data-1" class="slide level2 smaller center">
+<h2>Assessing Model Performance - Binary <span class="math inline">\(Y\)</span>, Birth Weight Data</h2>
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/rpbirthwttab_d3dbb772de6093e63df8159583f0f96d">
+<div class="cell-output-display">
+<table>
+<caption>Apparent versus expected true model performance (higher values are preferred) and <span class="math inline">\(P\)</span>-values from a test for equality of expected true performance. The cases considered are the kernel versus linear models, kernel versus linear with interaction models, kernel versus BIC-optimal models, and kernel versus the Klein and Spady models. Rejection of the null implies that the kernel-based model has significantly higher mean CCR on independent data.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Apparent</th>
+<th style="text-align: right;">Expected</th>
+<th style="text-align: right;">Rank</th>
+<th style="text-align: right;"><span class="math inline">\(P\)</span>-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Par-Linear</td>
+<td style="text-align: right;">0.762</td>
+<td style="text-align: right;">0.688</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.310</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Par-Linear-Int</td>
+<td style="text-align: right;">0.825</td>
+<td style="text-align: right;">0.616</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Par-BIC</td>
+<td style="text-align: right;">0.698</td>
+<td style="text-align: right;">0.680</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.004</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Semipar-KS</td>
+<td style="text-align: right;">0.741</td>
+<td style="text-align: right;">0.668</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nonpar</td>
+<td style="text-align: right;">0.841</td>
+<td style="text-align: right;">0.690</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="assessing-model-performance---continuous-y-wage-data" class="slide level2 center">
+<h2>Assessing Model Performance - Continuous <span class="math inline">\(Y\)</span>, Wage Data</h2>
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/rpwage1_87c14ad44da87666b594f571013b66e1">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a><span class="do">## This code chunk illustrates the RP test (Revealed Performance)</span></span>
+<span id="cb39-2"><a href="#cb39-2"></a><span class="do">## detailed in Racine and Parmeter (2012)</span></span>
+<span id="cb39-3"><a href="#cb39-3"></a><span class="fu">require</span>(crs)</span>
+<span id="cb39-4"><a href="#cb39-4"></a><span class="fu">require</span>(np)</span>
+<span id="cb39-5"><a href="#cb39-5"></a><span class="fu">data</span>(wage1)</span>
+<span id="cb39-6"><a href="#cb39-6"></a><span class="fu">options</span>(<span class="at">crs.messages=</span><span class="cn">FALSE</span>,<span class="at">np.messages=</span><span class="cn">FALSE</span>)</span>
+<span id="cb39-7"><a href="#cb39-7"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb39-8"><a href="#cb39-8"></a><span class="do">## Set the size of the evaluation data (n.eval) and the training data</span></span>
+<span id="cb39-9"><a href="#cb39-9"></a><span class="do">## (n.train), and number of train/eval splits (M).</span></span>
+<span id="cb39-10"><a href="#cb39-10"></a>n.eval <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb39-11"><a href="#cb39-11"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(wage1)</span>
+<span id="cb39-12"><a href="#cb39-12"></a>n.train <span class="ot">&lt;-</span> n<span class="sc">-</span>n.eval</span>
+<span id="cb39-13"><a href="#cb39-13"></a>M <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb39-14"><a href="#cb39-14"></a><span class="do">## Create storage vectors.</span></span>
+<span id="cb39-15"><a href="#cb39-15"></a>aspe.linear <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb39-16"><a href="#cb39-16"></a>aspe.quadint <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb39-17"><a href="#cb39-17"></a>aspe.mw <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb39-18"><a href="#cb39-18"></a>aspe.vc <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb39-19"><a href="#cb39-19"></a>aspe.pl <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb39-20"><a href="#cb39-20"></a>aspe.si <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb39-21"><a href="#cb39-21"></a>aspe.lc <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb39-22"><a href="#cb39-22"></a>aspe.ll <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb39-23"><a href="#cb39-23"></a>aspe.glp <span class="ot">&lt;-</span> <span class="fu">numeric</span>(M)</span>
+<span id="cb39-24"><a href="#cb39-24"></a><span class="do">## Copy the full sample into the object train.</span></span>
+<span id="cb39-25"><a href="#cb39-25"></a>train <span class="ot">&lt;-</span> wage1</span>
+<span id="cb39-26"><a href="#cb39-26"></a><span class="do">## Fit the parametric, semiparametric, and nonparametric models for </span></span>
+<span id="cb39-27"><a href="#cb39-27"></a><span class="do">## the full sample.</span></span>
+<span id="cb39-28"><a href="#cb39-28"></a><span class="do">##</span></span>
+<span id="cb39-29"><a href="#cb39-29"></a><span class="do">## Linear </span></span>
+<span id="cb39-30"><a href="#cb39-30"></a>lm.linear <span class="ot">&lt;-</span> <span class="fu">lm</span>(lwage<span class="sc">~</span>female<span class="sc">+</span></span>
+<span id="cb39-31"><a href="#cb39-31"></a>                married<span class="sc">+</span></span>
+<span id="cb39-32"><a href="#cb39-32"></a>                educ<span class="sc">+</span></span>
+<span id="cb39-33"><a href="#cb39-33"></a>                exper<span class="sc">+</span></span>
+<span id="cb39-34"><a href="#cb39-34"></a>                tenure,</span>
+<span id="cb39-35"><a href="#cb39-35"></a>                <span class="at">data=</span>train)</span>
+<span id="cb39-36"><a href="#cb39-36"></a><span class="do">## Linear with interactions and quadratic in experience (common</span></span>
+<span id="cb39-37"><a href="#cb39-37"></a><span class="do">## specification).</span></span>
+<span id="cb39-38"><a href="#cb39-38"></a>lm.quadint <span class="ot">&lt;-</span> <span class="fu">lm</span>(lwage<span class="sc">~</span>(female<span class="sc">+</span></span>
+<span id="cb39-39"><a href="#cb39-39"></a>                        married<span class="sc">+</span></span>
+<span id="cb39-40"><a href="#cb39-40"></a>                        educ<span class="sc">+</span></span>
+<span id="cb39-41"><a href="#cb39-41"></a>                        exper<span class="sc">+</span></span>
+<span id="cb39-42"><a href="#cb39-42"></a>                        <span class="fu">I</span>(exper<span class="sc">^</span><span class="dv">2</span>)<span class="sc">+</span></span>
+<span id="cb39-43"><a href="#cb39-43"></a>                        tenure)<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb39-44"><a href="#cb39-44"></a>                <span class="at">data=</span>train)</span>
+<span id="cb39-45"><a href="#cb39-45"></a><span class="do">## Murphy-Welch quartic specification                </span></span>
+<span id="cb39-46"><a href="#cb39-46"></a>lm.mw <span class="ot">&lt;-</span> <span class="fu">lm</span>(lwage<span class="sc">~</span>female<span class="sc">+</span></span>
+<span id="cb39-47"><a href="#cb39-47"></a>            married<span class="sc">+</span></span>
+<span id="cb39-48"><a href="#cb39-48"></a>            educ<span class="sc">+</span></span>
+<span id="cb39-49"><a href="#cb39-49"></a>            exper<span class="sc">+</span></span>
+<span id="cb39-50"><a href="#cb39-50"></a>            <span class="fu">I</span>(exper<span class="sc">^</span><span class="dv">2</span>)<span class="sc">+</span></span>
+<span id="cb39-51"><a href="#cb39-51"></a>            <span class="fu">I</span>(exper<span class="sc">^</span><span class="dv">3</span>)<span class="sc">+</span></span>
+<span id="cb39-52"><a href="#cb39-52"></a>            <span class="fu">I</span>(exper<span class="sc">^</span><span class="dv">4</span>)<span class="sc">+</span></span>
+<span id="cb39-53"><a href="#cb39-53"></a>            tenure,</span>
+<span id="cb39-54"><a href="#cb39-54"></a>            <span class="at">data=</span>train)</span>
+<span id="cb39-55"><a href="#cb39-55"></a><span class="do">## Varying coefficient</span></span>
+<span id="cb39-56"><a href="#cb39-56"></a>model.vc <span class="ot">&lt;-</span> <span class="fu">npscoef</span>(lwage<span class="sc">~</span>educ<span class="sc">+</span></span>
+<span id="cb39-57"><a href="#cb39-57"></a>                    tenure<span class="sc">+</span></span>
+<span id="cb39-58"><a href="#cb39-58"></a>                    exper<span class="sc">+</span></span>
+<span id="cb39-59"><a href="#cb39-59"></a>                    expersq<span class="sc">|</span>female<span class="sc">+</span>married,</span>
+<span id="cb39-60"><a href="#cb39-60"></a>                    <span class="at">data=</span>train)</span>
+<span id="cb39-61"><a href="#cb39-61"></a><span class="do">## Partially linear</span></span>
+<span id="cb39-62"><a href="#cb39-62"></a>model.pl <span class="ot">&lt;-</span> <span class="fu">npplreg</span>(lwage<span class="sc">~</span>female<span class="sc">+</span></span>
+<span id="cb39-63"><a href="#cb39-63"></a>                    married<span class="sc">+</span></span>
+<span id="cb39-64"><a href="#cb39-64"></a>                    educ<span class="sc">+</span></span>
+<span id="cb39-65"><a href="#cb39-65"></a>                    tenure<span class="sc">|</span>exper,</span>
+<span id="cb39-66"><a href="#cb39-66"></a>                    <span class="at">data=</span>train)</span>
+<span id="cb39-67"><a href="#cb39-67"></a><span class="do">## Single-index (Ichimura)</span></span>
+<span id="cb39-68"><a href="#cb39-68"></a>model.si <span class="ot">&lt;-</span> <span class="fu">npindex</span>(lwage<span class="sc">~</span>female<span class="sc">+</span></span>
+<span id="cb39-69"><a href="#cb39-69"></a>                    married<span class="sc">+</span></span>
+<span id="cb39-70"><a href="#cb39-70"></a>                    educ<span class="sc">+</span></span>
+<span id="cb39-71"><a href="#cb39-71"></a>                    tenure<span class="sc">+</span></span>
+<span id="cb39-72"><a href="#cb39-72"></a>                    exper<span class="sc">+</span></span>
+<span id="cb39-73"><a href="#cb39-73"></a>                    expersq,</span>
+<span id="cb39-74"><a href="#cb39-74"></a>                    <span class="at">method=</span><span class="st">"ichimura"</span>,</span>
+<span id="cb39-75"><a href="#cb39-75"></a>                    <span class="at">data=</span>train)</span>
+<span id="cb39-76"><a href="#cb39-76"></a><span class="do">## Local constant</span></span>
+<span id="cb39-77"><a href="#cb39-77"></a>bw.lc <span class="ot">&lt;-</span> <span class="fu">npregbw</span>(lwage<span class="sc">~</span>female<span class="sc">+</span></span>
+<span id="cb39-78"><a href="#cb39-78"></a>                 married<span class="sc">+</span></span>
+<span id="cb39-79"><a href="#cb39-79"></a>                 educ<span class="sc">+</span></span>
+<span id="cb39-80"><a href="#cb39-80"></a>                 exper<span class="sc">+</span></span>
+<span id="cb39-81"><a href="#cb39-81"></a>                 tenure,</span>
+<span id="cb39-82"><a href="#cb39-82"></a>                 <span class="at">regtype=</span><span class="st">"lc"</span>,</span>
+<span id="cb39-83"><a href="#cb39-83"></a>                 <span class="at">bwmethod=</span><span class="st">"cv.aic"</span>,</span>
+<span id="cb39-84"><a href="#cb39-84"></a>                 <span class="at">data=</span>train)</span>
+<span id="cb39-85"><a href="#cb39-85"></a>model.lc <span class="ot">&lt;-</span> <span class="fu">npreg</span>(<span class="at">bws=</span>bw.lc)</span>
+<span id="cb39-86"><a href="#cb39-86"></a><span class="do">## Local linear</span></span>
+<span id="cb39-87"><a href="#cb39-87"></a>bw.ll <span class="ot">&lt;-</span> <span class="fu">npregbw</span>(lwage<span class="sc">~</span>female<span class="sc">+</span></span>
+<span id="cb39-88"><a href="#cb39-88"></a>                 married<span class="sc">+</span></span>
+<span id="cb39-89"><a href="#cb39-89"></a>                 educ<span class="sc">+</span></span>
+<span id="cb39-90"><a href="#cb39-90"></a>                 exper<span class="sc">+</span></span>
+<span id="cb39-91"><a href="#cb39-91"></a>                 tenure,</span>
+<span id="cb39-92"><a href="#cb39-92"></a>                 <span class="at">regtype=</span><span class="st">"ll"</span>,</span>
+<span id="cb39-93"><a href="#cb39-93"></a>                 <span class="at">bwmethod=</span><span class="st">"cv.aic"</span>,</span>
+<span id="cb39-94"><a href="#cb39-94"></a>                 <span class="at">data=</span>train)</span>
+<span id="cb39-95"><a href="#cb39-95"></a>model.ll <span class="ot">&lt;-</span> <span class="fu">npreg</span>(<span class="at">bws=</span>bw.ll)</span>
+<span id="cb39-96"><a href="#cb39-96"></a><span class="do">## Generalized local polynomial</span></span>
+<span id="cb39-97"><a href="#cb39-97"></a>ghat <span class="ot">&lt;-</span> <span class="fu">npglpreg</span>(lwage<span class="sc">~</span>female<span class="sc">+</span></span>
+<span id="cb39-98"><a href="#cb39-98"></a>                 married<span class="sc">+</span></span>
+<span id="cb39-99"><a href="#cb39-99"></a>                 educ<span class="sc">+</span></span>
+<span id="cb39-100"><a href="#cb39-100"></a>                 exper<span class="sc">+</span></span>
+<span id="cb39-101"><a href="#cb39-101"></a>                 tenure,</span>
+<span id="cb39-102"><a href="#cb39-102"></a>                 <span class="at">cv.func=</span><span class="st">"cv.aic"</span>,</span>
+<span id="cb39-103"><a href="#cb39-103"></a>                 <span class="at">data=</span>train)</span>
+<span id="cb39-104"><a href="#cb39-104"></a>model.glp <span class="ot">&lt;-</span> <span class="fu">npglpreg</span>(ghat<span class="sc">$</span>formula,<span class="at">cv=</span><span class="st">"none"</span>,<span class="at">degree=</span>ghat<span class="sc">$</span>degree,<span class="at">bws=</span>ghat<span class="sc">$</span>bws,<span class="at">data=</span>train)</span>
+<span id="cb39-105"><a href="#cb39-105"></a><span class="do">## Apparent (in-sample) performance</span></span>
+<span id="cb39-106"><a href="#cb39-106"></a>aspe.app.linear <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(lm.linear,<span class="at">newdata=</span>train))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-107"><a href="#cb39-107"></a>aspe.app.quadint <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(lm.quadint,<span class="at">newdata=</span>train))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-108"><a href="#cb39-108"></a>aspe.app.mw <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(lm.mw,<span class="at">newdata=</span>train))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-109"><a href="#cb39-109"></a>aspe.app.vc <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.vc,<span class="at">newdata=</span>train))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-110"><a href="#cb39-110"></a>aspe.app.pl <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.pl,<span class="at">newdata=</span>train))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-111"><a href="#cb39-111"></a>aspe.app.si <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.si,<span class="at">newdata=</span>train))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-112"><a href="#cb39-112"></a>aspe.app.lc <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.lc,<span class="at">newdata=</span>train))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-113"><a href="#cb39-113"></a>aspe.app.ll <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.ll,<span class="at">newdata=</span>train))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-114"><a href="#cb39-114"></a>aspe.app.glp <span class="ot">&lt;-</span> <span class="fu">with</span>(train,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.glp,<span class="at">newdata=</span>train))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-115"><a href="#cb39-115"></a><span class="do">## Conduct the M train/eval splits</span></span>
+<span id="cb39-116"><a href="#cb39-116"></a><span class="cf">for</span>(m <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>M) {</span>
+<span id="cb39-117"><a href="#cb39-117"></a>    <span class="do">## We set the seed here to guarantee that the shuffles generated</span></span>
+<span id="cb39-118"><a href="#cb39-118"></a>    <span class="do">## here and those in the Practitioner's Corner in Chapter 6 are</span></span>
+<span id="cb39-119"><a href="#cb39-119"></a>    <span class="do">## identical.</span></span>
+<span id="cb39-120"><a href="#cb39-120"></a>    <span class="fu">set.seed</span>(m)</span>
+<span id="cb39-121"><a href="#cb39-121"></a>    <span class="do">## Shuffle the data into independent training and evaluation</span></span>
+<span id="cb39-122"><a href="#cb39-122"></a>    <span class="do">## samples.</span></span>
+<span id="cb39-123"><a href="#cb39-123"></a>    ii <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n,<span class="at">replace=</span><span class="cn">FALSE</span>)</span>
+<span id="cb39-124"><a href="#cb39-124"></a>    train <span class="ot">&lt;-</span> wage1[ii[<span class="dv">1</span><span class="sc">:</span>n.train],]</span>
+<span id="cb39-125"><a href="#cb39-125"></a>    eval <span class="ot">&lt;-</span> wage1[ii[(n.train<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>n],]</span>
+<span id="cb39-126"><a href="#cb39-126"></a>    <span class="do">## Extract the APSEs for the independent evaluation data where we</span></span>
+<span id="cb39-127"><a href="#cb39-127"></a>    <span class="do">## know the outcomes (update() refits the lm model on train).</span></span>
+<span id="cb39-128"><a href="#cb39-128"></a>    aspe.linear[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(<span class="fu">update</span>(lm.linear),<span class="at">newdata=</span>eval))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-129"><a href="#cb39-129"></a>    aspe.quadint[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(<span class="fu">update</span>(lm.quadint),<span class="at">newdata=</span>eval))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-130"><a href="#cb39-130"></a>    aspe.mw[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(<span class="fu">update</span>(lm.mw),<span class="at">newdata=</span>eval))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-131"><a href="#cb39-131"></a>    <span class="do">## Calling the semi- and nonparametric functions with the existing</span></span>
+<span id="cb39-132"><a href="#cb39-132"></a>    <span class="do">## bandwidth object re-estimates the model on the updated training data.</span></span>
+<span id="cb39-133"><a href="#cb39-133"></a>    model.vc.boot <span class="ot">&lt;-</span> <span class="fu">npscoef</span>(<span class="at">bws=</span>model.vc<span class="sc">$</span>bws)</span>
+<span id="cb39-134"><a href="#cb39-134"></a>    aspe.vc[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.vc.boot,<span class="at">newdata=</span>eval))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-135"><a href="#cb39-135"></a>    model.pl.boot <span class="ot">&lt;-</span> <span class="fu">npplreg</span>(<span class="at">bws=</span>model.pl<span class="sc">$</span>bw)</span>
+<span id="cb39-136"><a href="#cb39-136"></a>    aspe.pl[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.pl.boot,<span class="at">newdata=</span>eval))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-137"><a href="#cb39-137"></a>    model.si.boot <span class="ot">&lt;-</span> <span class="fu">npindex</span>(<span class="at">bws=</span>model.si<span class="sc">$</span>bws)</span>
+<span id="cb39-138"><a href="#cb39-138"></a>    aspe.si[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.si.boot,<span class="at">newdata=</span>eval))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-139"><a href="#cb39-139"></a>    model.lc <span class="ot">&lt;-</span> <span class="fu">npreg</span>(<span class="at">bws=</span>bw.lc)        </span>
+<span id="cb39-140"><a href="#cb39-140"></a>    aspe.lc[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.lc,<span class="at">newdata=</span>eval))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-141"><a href="#cb39-141"></a>    model.ll <span class="ot">&lt;-</span> <span class="fu">npreg</span>(<span class="at">bws=</span>bw.ll)</span>
+<span id="cb39-142"><a href="#cb39-142"></a>    aspe.ll[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.ll,<span class="at">newdata=</span>eval))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-143"><a href="#cb39-143"></a>    model.glp <span class="ot">&lt;-</span> <span class="fu">npglpreg</span>(ghat<span class="sc">$</span>formula,<span class="at">cv=</span><span class="st">"none"</span>,<span class="at">degree=</span>ghat<span class="sc">$</span>degree,<span class="at">bws=</span>ghat<span class="sc">$</span>bws,<span class="at">data=</span>train)</span>
+<span id="cb39-144"><a href="#cb39-144"></a>    aspe.glp[m] <span class="ot">&lt;-</span> <span class="fu">with</span>(eval,<span class="fu">mean</span>((lwage<span class="sc">-</span><span class="fu">predict</span>(model.glp,<span class="at">newdata=</span>eval))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb39-145"><a href="#cb39-145"></a>}</span>
+<span id="cb39-146"><a href="#cb39-146"></a><span class="do">## Conduct a paired t-test that the mean expected true ASPE for each</span></span>
+<span id="cb39-147"><a href="#cb39-147"></a><span class="do">## model is equal versus the alternative that the kernel has a</span></span>
+<span id="cb39-148"><a href="#cb39-148"></a><span class="do">## significantly lower expected true ASPE than the MW-optimal lm</span></span>
+<span id="cb39-149"><a href="#cb39-149"></a><span class="do">## model.</span></span>
+<span id="cb39-150"><a href="#cb39-150"></a><span class="do">## LC versus parametric and semiparametric.</span></span>
+<span id="cb39-151"><a href="#cb39-151"></a>p.linear <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.lc,aspe.linear,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-152"><a href="#cb39-152"></a>p.quadint <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.lc,aspe.quadint,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-153"><a href="#cb39-153"></a>p.mw <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.lc,aspe.mw,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-154"><a href="#cb39-154"></a>p.vc <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.lc,aspe.vc,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-155"><a href="#cb39-155"></a>p.pl <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.lc,aspe.pl,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-156"><a href="#cb39-156"></a>p.si <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.lc,aspe.si,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-157"><a href="#cb39-157"></a>p.lc <span class="ot">&lt;-</span> <span class="fu">c</span>(p.linear,p.quadint,p.mw,p.vc,p.pl,p.si,<span class="cn">NA</span>,<span class="cn">NA</span>,<span class="cn">NA</span>)</span>
+<span id="cb39-158"><a href="#cb39-158"></a><span class="do">## LL versus parametric and semiparametric.</span></span>
+<span id="cb39-159"><a href="#cb39-159"></a>p.linear <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.ll,aspe.linear,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-160"><a href="#cb39-160"></a>p.quadint <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.ll,aspe.quadint,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-161"><a href="#cb39-161"></a>p.mw <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.ll,aspe.mw,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-162"><a href="#cb39-162"></a>p.vc <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.ll,aspe.vc,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-163"><a href="#cb39-163"></a>p.pl <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.ll,aspe.pl,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-164"><a href="#cb39-164"></a>p.si <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.ll,aspe.si,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-165"><a href="#cb39-165"></a>p.ll <span class="ot">&lt;-</span> <span class="fu">c</span>(p.linear,p.quadint,p.mw,p.vc,p.pl,p.si,<span class="cn">NA</span>,<span class="cn">NA</span>,<span class="cn">NA</span>)</span>
+<span id="cb39-166"><a href="#cb39-166"></a><span class="do">## GLP versus parametric and semiparametric.</span></span>
+<span id="cb39-167"><a href="#cb39-167"></a>p.linear <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.glp,aspe.linear,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-168"><a href="#cb39-168"></a>p.quadint <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.glp,aspe.quadint,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-169"><a href="#cb39-169"></a>p.mw <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.glp,aspe.mw,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-170"><a href="#cb39-170"></a>p.vc <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.glp,aspe.vc,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-171"><a href="#cb39-171"></a>p.pl <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.glp,aspe.pl,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-172"><a href="#cb39-172"></a>p.si <span class="ot">&lt;-</span> <span class="fu">t.test</span>(aspe.glp,aspe.si,<span class="at">alternative=</span><span class="st">"less"</span>,<span class="at">paired=</span><span class="cn">TRUE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb39-173"><a href="#cb39-173"></a>p.glp <span class="ot">&lt;-</span> <span class="fu">c</span>(p.linear,p.quadint,p.mw,p.vc,p.pl,p.si,<span class="cn">NA</span>,<span class="cn">NA</span>,<span class="cn">NA</span>)</span>
+<span id="cb39-174"><a href="#cb39-174"></a><span class="do">## Apparent performance.</span></span>
+<span id="cb39-175"><a href="#cb39-175"></a>apparent <span class="ot">&lt;-</span> <span class="fu">c</span>(aspe.app.linear,aspe.app.quadint,aspe.app.mw,</span>
+<span id="cb39-176"><a href="#cb39-176"></a>              aspe.app.vc,aspe.app.pl,aspe.app.si,</span>
+<span id="cb39-177"><a href="#cb39-177"></a>              aspe.app.glp,aspe.app.ll,aspe.app.lc)</span>
+<span id="cb39-178"><a href="#cb39-178"></a><span class="do">## Expected true performance.</span></span>
+<span id="cb39-179"><a href="#cb39-179"></a>true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">mean</span>(aspe.linear),<span class="fu">mean</span>(aspe.quadint),<span class="fu">mean</span>(aspe.mw),</span>
+<span id="cb39-180"><a href="#cb39-180"></a>          <span class="fu">mean</span>(aspe.vc),<span class="fu">mean</span>(aspe.pl),<span class="fu">mean</span>(aspe.si),</span>
+<span id="cb39-181"><a href="#cb39-181"></a>          <span class="fu">mean</span>(aspe.glp),<span class="fu">mean</span>(aspe.ll),<span class="fu">mean</span>(aspe.lc))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="assessing-model-performance---continuous-y-wage-data-1" class="slide level2 smaller center">
+<h2>Assessing Model Performance - Continuous <span class="math inline">\(Y\)</span>, Wage Data</h2>
+<div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/rpwage1tab_593ac5830a27f964dc673035754dc74f">
+<div class="cell-output-display">
+<table>
+<caption>Apparent versus expected true model performance (lower values are preferred) and <span class="math inline">\(P\)</span>-values from a test for equality of expected true performance for the kernel versus the parametric and semiparametric models (rejection of the null implies the kernel model has significantly lower mean ASPE on independent data).</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Apparent</th>
+<th style="text-align: right;">Expected</th>
+<th style="text-align: right;">Rank</th>
+<th style="text-align: right;"><span class="math inline">\(P\)</span>-GLP</th>
+<th style="text-align: right;"><span class="math inline">\(P\)</span>-LL</th>
+<th style="text-align: right;"><span class="math inline">\(P\)</span>-LC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Par-Linear</td>
+<td style="text-align: right;">0.1682</td>
+<td style="text-align: right;">0.1699</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Par-Quad-Int</td>
+<td style="text-align: right;">0.1474</td>
+<td style="text-align: right;">0.1597</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.1216</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Par-Murphy-Welch</td>
+<td style="text-align: right;">0.1561</td>
+<td style="text-align: right;">0.1579</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.6568</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Semipar-VC</td>
+<td style="text-align: right;">0.1470</td>
+<td style="text-align: right;">0.1539</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0102</td>
+<td style="text-align: right;">1.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Semipar-PL</td>
+<td style="text-align: right;">0.1544</td>
+<td style="text-align: right;">0.1606</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0107</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Semipar-SI</td>
+<td style="text-align: right;">0.1540</td>
+<td style="text-align: right;">0.1549</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0026</td>
+<td style="text-align: right;">1.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nonpar-GLP</td>
+<td style="text-align: right;">0.1407</td>
+<td style="text-align: right;">0.1506</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nonpar-LL</td>
+<td style="text-align: right;">0.1372</td>
+<td style="text-align: right;">0.1525</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nonpar-LC</td>
+<td style="text-align: right;">0.1319</td>
+<td style="text-align: right;">0.1583</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section></section>
+<section>
 <section id="quarto-technical-reproducible-documents" class="title-slide slide level1 center">
 <h1>Quarto: Technical, Reproducible Documents</h1>
 
@@ -3061,6 +3575,9 @@ Racine, J. S. 1997. <span>“Consistent Significance Testing for Nonparametric R
 <div id="ref-RACINE_HART_LI:2006" class="csl-entry" role="listitem">
 Racine, J. S., J. D. Hart, and Q. Li. 2006. <span>“Testing the Significance of Categorical Predictor Variables in Nonparametric Regression Models.”</span> <em>Econometric Reviews</em> 25: 523–44.
 </div>
+<div id="ref-RACINE_PARMETER:2012" class="csl-entry" role="listitem">
+Racine, J. S., and C. Parmeter. 2012. <span>“Data-Driven Model Evaluation: A Test for Revealed Performance.”</span> In <em>Handbook of Applied Nonparametric and Semiparametric Econometrics and Statistics</em>, edited by A. Ullah, J. S. Racine, and L. Su. New York: Oxford University Press.
+</div>
 <div id="ref-ROBINSON:1988" class="csl-entry" role="listitem">
 Robinson, P. M. 1988. <span>“Root-n Consistent Semiparametric Regression.”</span> <em>Econometrica</em> 56: 931–54.
 </div>
@@ -3114,7 +3631,7 @@ Yu, Keming, and M. C. Jones. 2004. <span>“Likelihood-Based Local Linear Estima
 'autoAnimateUnmatched': true,
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
-'multiplex': {"secret":null,"id":"c5c69097d62834b0","url":"https://reveal-multiplex.glitch.me/"},
+'multiplex': {"secret":null,"id":"d73f179200fb9370","url":"https://reveal-multiplex.glitch.me/"},
 'smaller': false,
  
         // Display controls in the bottom right corner

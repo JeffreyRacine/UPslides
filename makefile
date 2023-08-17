@@ -6,8 +6,9 @@ talk:
 	Rscript -e 'knitr::purl("regression.qmd")'
 	Rscript -e 'knitr::purl("ar_volatility_panel.qmd")'
 	Rscript -e 'knitr::purl("semipar.qmd")'
+	Rscript -e 'knitr::purl("model_performance.qmd")'
 	Rscript -e 'knitr::purl("quarto.qmd")'
-	cat index.R density_probability.R regression.R ar_volatility_panel.R semipar.R quarto.R > tmp_R;rm *.R;mv tmp_R index.R
+	cat index.R density_probability.R regression.R ar_volatility_panel.R semipar.R model_performance.R quarto.R > tmp_R;rm *.R;mv tmp_R index.R
 	git add index_files
 
 chrome:
