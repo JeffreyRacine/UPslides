@@ -148,8 +148,6 @@ model)
 
 - It nests linear, partially linear, and locally linear models as special cases
 
-- This model also nests a local linear model as a special case
-
 - The smooth coefficient model is given by
   \begin{equation*}
     Y_i = \alpha(Z_i) + X_i'\beta(Z_i) + u_i,
