@@ -295,7 +295,7 @@ cbind(fitted(model.glp),fitted(model.lm))[1:10,]
 
 # Nonparametric Conditional Volatility Modelling
 
-## Conditional Variance Function Estimation (ARCH)
+## Conditional Variance Estimation (ARCH)
 
 - A conditional moment that is particularly popular in time series settings is the *second conditional moment about the conditional mean* or the *conditional variance* function, often denoted by $\sigma^2(x)$
 
