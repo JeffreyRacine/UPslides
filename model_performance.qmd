@@ -6,11 +6,11 @@
 
 - Comparing in-sample performance ("Apparent") is not convincing (overfitting, etc.)
 
-- Let's split the data into two sets, a "training" set and independent "evaluation" set, the fit a set of models on the training set and asses how the predictions do using the independent evaluation data
+- Let's split the data into two sets, a "training" set and independent "evaluation" set, then fit a set of models on the training set and asses how the predictions do using the independent evaluation data
 
-- Of course, one split of the data might favour one model, another split some other model, so we repeat this process a large number of times, compute some measure of average performance over all splits, and test whether the average performance for one model is *significantly* different from the average performance for some other using the "Revealed Performance" test [@RACINE_PARMETER:2012]
+- Of course, one split of the data might favour one model, another split some other model, so we repeat this process a large number of times, compute some measure of average performance over all splits ("Expected"), and test whether average performance for one model is *significantly* different from average performance for some other using the "Revealed Performance" (RP) test [@RACINE_PARMETER:2012]
 
-## Assessing Model Performance - Binary $Y$, Birth Weight Data
+## RP Test - Binary $Y$ `birthwt` Data  (scrollable)
 
 ```{r rpbirthwt,echo=TRUE}
 require(np)
@@ -164,7 +164,7 @@ apparent <- c(ccr.app.linear,ccr.app.linint,ccr.app.BIC,ccr.app.index,ccr.app.ke
 true <- c(mean(ccr.linear),mean(ccr.linint),mean(ccr.BIC),mean(ccr.index),mean(ccr.kernel))
 ```
 
-## Assessing Model Performance - Binary $Y$, Birth Weight Data {.smaller}
+## RP Test - Binary $Y$ `birthwt` Data {.smaller}
 
 ```{r rpbirthwttab,echo=FALSE}
 foo <- data.frame(apparent,true,rank(-true),p)
@@ -176,7 +176,7 @@ knitr::kable(foo,
              escape=FALSE)
 ```
 
-## Assessing Model Performance - Continuous $Y$, Wage Data
+## RP Test - Continuous $Y$ `wage1` Data (scrollable)
 
 ```{r rpwage1,echo=TRUE}
 ## This code chunk illustrates the RP test (Revealed Performance)
@@ -362,7 +362,7 @@ true <- c(mean(aspe.linear),mean(aspe.quadint),mean(aspe.mw),
           mean(aspe.glp),mean(aspe.ll),mean(aspe.lc))
 ```
 
-## Assessing Model Performance - Continuous $Y$, Wage Data {.smaller}
+## RP Test - Continuous $Y$ `wage1` Data {.smaller}
 
 ```{r rpwage1tab,echo=FALSE}
 foo <- data.frame(apparent,true,rank(true),p.glp,p.ll,p.lc)

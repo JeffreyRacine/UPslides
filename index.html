@@ -2943,12 +2943,12 @@ c&amp;c&amp;c&amp;\dots&amp; 1
 <ul>
 <li class="fragment"><p>Let’s compare the parametric, semiparametric, and nonparametric approaches on two real-world datasets</p></li>
 <li class="fragment"><p>Comparing in-sample performance (“Apparent”) is not convincing (overfitting, etc.)</p></li>
-<li class="fragment"><p>Let’s split the data into two sets, a “training” set and independent “evaluation” set, the fit a set of models on the training set and asses how the predictions do using the independent evaluation data</p></li>
-<li class="fragment"><p>Of course, one split of the data might favour one model, another split some other model, so we repeat this process a large number of times, compute some measure of average performance over all splits, and test whether the average performance for one model is <em>significantly</em> different from the average performance for some other using the “Revealed Performance” test <span class="citation" data-cites="RACINE_PARMETER:2012">(<a href="#/references-scrollable" role="doc-biblioref" onclick="">Racine and Parmeter 2012</a>)</span></p></li>
+<li class="fragment"><p>Let’s split the data into two sets, a “training” set and independent “evaluation” set, then fit a set of models on the training set and asses how the predictions do using the independent evaluation data</p></li>
+<li class="fragment"><p>Of course, one split of the data might favour one model, another split some other model, so we repeat this process a large number of times, compute some measure of average performance over all splits (“Expected”), and test whether average performance for one model is <em>significantly</em> different from average performance for some other using the “Revealed Performance” (RP) test <span class="citation" data-cites="RACINE_PARMETER:2012">(<a href="#/references-scrollable" role="doc-biblioref" onclick="">Racine and Parmeter 2012</a>)</span></p></li>
 </ul>
 </section>
-<section id="assessing-model-performance---binary-y-birth-weight-data" class="slide level2 center">
-<h2>Assessing Model Performance - Binary <span class="math inline">\(Y\)</span>, Birth Weight Data</h2>
+<section id="rp-test---binary-y-birthwt-data-scrollable" class="slide level2 center">
+<h2>RP Test - Binary <span class="math inline">\(Y\)</span> <code>birthwt</code> Data (scrollable)</h2>
 <div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/rpbirthwt_5bb8cab692370ed487fb746fcf4d59b2">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a><span class="fu">require</span>(np)</span>
 <span id="cb38-2"><a href="#cb38-2"></a><span class="fu">require</span>(MASS)</span>
@@ -3101,8 +3101,8 @@ c&amp;c&amp;c&amp;\dots&amp; 1
 <span id="cb38-149"><a href="#cb38-149"></a>true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">mean</span>(ccr.linear),<span class="fu">mean</span>(ccr.linint),<span class="fu">mean</span>(ccr.BIC),<span class="fu">mean</span>(ccr.index),<span class="fu">mean</span>(ccr.kernel))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="assessing-model-performance---binary-y-birth-weight-data-1" class="slide level2 smaller center">
-<h2>Assessing Model Performance - Binary <span class="math inline">\(Y\)</span>, Birth Weight Data</h2>
+<section id="rp-test---binary-y-birthwt-data" class="slide level2 smaller center">
+<h2>RP Test - Binary <span class="math inline">\(Y\)</span> <code>birthwt</code> Data</h2>
 <div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/rpbirthwttab_d3dbb772de6093e63df8159583f0f96d">
 <div class="cell-output-display">
 <table>
@@ -3157,8 +3157,8 @@ c&amp;c&amp;c&amp;\dots&amp; 1
 </div>
 </div>
 </section>
-<section id="assessing-model-performance---continuous-y-wage-data" class="slide level2 center">
-<h2>Assessing Model Performance - Continuous <span class="math inline">\(Y\)</span>, Wage Data</h2>
+<section id="rp-test---continuous-y-wage1-data-scrollable" class="slide level2 center">
+<h2>RP Test - Continuous <span class="math inline">\(Y\)</span> <code>wage1</code> Data (scrollable)</h2>
 <div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/rpwage1_87c14ad44da87666b594f571013b66e1">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a><span class="do">## This code chunk illustrates the RP test (Revealed Performance)</span></span>
 <span id="cb39-2"><a href="#cb39-2"></a><span class="do">## detailed in Racine and Parmeter (2012)</span></span>
@@ -3343,8 +3343,8 @@ c&amp;c&amp;c&amp;\dots&amp; 1
 <span id="cb39-181"><a href="#cb39-181"></a>          <span class="fu">mean</span>(aspe.glp),<span class="fu">mean</span>(aspe.ll),<span class="fu">mean</span>(aspe.lc))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="assessing-model-performance---continuous-y-wage-data-1" class="slide level2 smaller center">
-<h2>Assessing Model Performance - Continuous <span class="math inline">\(Y\)</span>, Wage Data</h2>
+<section id="rp-test---continuous-y-wage1-data" class="slide level2 smaller center">
+<h2>RP Test - Continuous <span class="math inline">\(Y\)</span> <code>wage1</code> Data</h2>
 <div class="cell" data-layout-align="center" data-hash="index_cache/revealjs/rpwage1tab_593ac5830a27f964dc673035754dc74f">
 <div class="cell-output-display">
 <table>
