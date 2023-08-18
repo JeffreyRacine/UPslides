@@ -10,6 +10,7 @@ format:
     background-transition: fade
     center: true
     chalkboard: true
+    code-link: true
     css: custom.css
     embed-resources: false
     footer: "Workshop | J. Racine"
