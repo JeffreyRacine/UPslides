@@ -137,7 +137,7 @@ plot(x,dnorm(x,mean=mean(x),sd=sd(x)),type="l",ylab="Parametric Density Estimate
 
 ## Parametric or Nonparametric?
 
-- The R function `shapiro.test(x)` tests for normality
+- The R function `shapiro.test()` tests for normality
   
   ```{r shapiro}
   pander::pander(shapiro.test(x))
