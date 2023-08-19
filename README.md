@@ -7,4 +7,4 @@ The website for this workshop can be accessed via <https://jeffreyracine.github.
 
 The GitHub repository for this project is <https://github.com/JeffreyRacine/UPslides> (you are here!)
 
-To generate the slides, a) click CODE icon on the GitHub repository, b) click on Download ZIP, c) unzip the download, d) open index.qmd in RStudio, e) click Render in RStudio, f) be patient, the code can take some time to run and complete.
+To generate the slides, a) click the CODE icon in the GitHub repository, b) click on Download ZIP, c) unzip the download, d) open index.qmd in RStudio, e) click Render in RStudio, f) be patient, the code can take some time to run and complete.
